@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const DentalUser = require('../models/DentalUser.js');
 const DentalDoctors = require('../models/DentalDoctors.js');
 const NotificationArray = require('../models/NotificationArray.js');
-
+const AddMemberRequets = require('../models/AddMemberRequets.js');
+const { ObjectId } = require('mongodb');
 
 var nodemailer = require('nodemailer');
 
@@ -25,7 +26,13 @@ const getAllUsers = async (req, res) => {
 
 const getSingleUser = async (req, resp) => {
     try {
-        let single = await DentalUser.findOne({ _id: req.params._id });
+        let single = await DentalUser.findById(req.params._id).populate({
+            path: 'sendrequestID',
+            populate: {
+                path: 'requaesterID',
+                model: 'dentalusers'
+            }
+        });
         resp.send(single);
     } catch (err) {
         res.status(500).json(err);
@@ -172,6 +179,95 @@ const checkotpnow = async (req, resp) => {
 
 
 
+const searchUserByAllDetails = async (req, res) => {
+    try {
+        const result = await DentalUser.find({
+            "$or": [
+                { name: { $regex: req.params.key, $options: "i" } },
+                { email: { $regex: req.params.key, $options: "i" } }
+            ]
+        });
+        res.send(result);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+};
+
+
+
+
+const addFamilyMember = async (req, res) => {
+    try {
+        const requaester = await DentalUser.findById(req.body.requaesterID);
+        const accepter = await DentalUser.findById(req.body.accepterID);
+        if (!requaester || !accepter)
+            return res.send("No user found");
+        const newDocument = new AddMemberRequets(req.body);
+        const result = await newDocument.save();
+        const addrequest = new mongoose.Types.ObjectId(newDocument.id);
+        let single = await DentalUser.findByIdAndUpdate(req.body.requaesterID, {
+            $push: {
+                sendrequestID: addrequest
+            }
+        });
+        let nextStep = await DentalUser.findByIdAndUpdate(req.body.accepterID, {
+            $push: {
+                sendrequestID: addrequest
+            }
+        });
+        res.send(result);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+};
+
+
+
+
+const findUserDetailsWithStatus = async (req, res) => {
+    try {
+        const requaester = await DentalUser.findById(req.body.tofiendUserID).populate("sendrequestID");
+
+        const searchId = new ObjectId(req.body.accepterID);
+
+        const result = requaester.sendrequestID.find(obj => obj.accepterID.equals(searchId));
+
+        const userDetailsaccepter = await DentalUser.findById(req.body.accepterID)
+        if (result) {
+            userDetailsaccepter._doc.statusMessage = "Yes";
+            res.send(userDetailsaccepter);
+
+            console.log('accepterID is present:', userDetailsaccepter);
+        } else {
+            userDetailsaccepter._doc.statusMessage = "No";
+            console.log('accepterID is not present');
+            res.send(userDetailsaccepter);
+        }
+
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+};
+
+
+
+const updateFamilyRequestDetails = async (req, res) => {
+    try {
+        console.log(req.params)
+        let data = await AddMemberRequets.updateOne(
+            req.params,
+            { $set: req.body }
+        );
+        res.send(data);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
 
 
 
@@ -182,4 +278,4 @@ const checkotpnow = async (req, resp) => {
 
 
 
-module.exports = { checkotpnow, genarateOtpandsendtoemail,  getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser };
+module.exports = { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser, searchUserByAllDetails };

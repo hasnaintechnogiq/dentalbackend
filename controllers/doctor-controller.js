@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const DentalUser = require('../models/DentalUser.js');
 const DentalDoctors = require('../models/DentalDoctors.js');
 const NotificationArray = require('../models/NotificationArray.js');
-
+const Clinic = require('../models/Clinic.js');
 
 var nodemailer = require('nodemailer');
 
@@ -42,14 +42,14 @@ const searchDoctorsByCity = async (req, res) => {
             drcity: drcity
         });
         if (!ourUser)
-          return res.status(200).json(error("City Not Found"));
+            return res.status(200).json(error("City Not Found"));
 
-      res.send(ourUser);
+        res.send(ourUser);
 
-      } catch (err) {
+    } catch (err) {
         console.log(err);
-        res.status(400).json(error("error", res.statusCode));
-      }
+        res.status(400).json(error("error"));
+    }
 };
 
 
@@ -63,10 +63,10 @@ const searchDoctorsByName = async (req, res) => {
         });
         res.send(result);
 
-      } catch (err) {
+    } catch (err) {
         console.log(err);
-        res.status(400).json(error("error", res.statusCode));
-      }
+        res.status(400).json(error("error"));
+    }
 };
 
 
@@ -91,8 +91,27 @@ const getAllDoctors = async (req, res) => {
     }
 };
 
+// const addNewClinicinDoctor = async (req, res) => {
+//     console.log(req.body)
+//     try {
+//         const doctorfound = await DentalDoctors.findById(req.body.doctorID);
+//         if (!doctorfound)
+//             return res.send("No doctor found");
+//         const newDocument = new Clinic(req.body);
+//         const result = await newDocument.save();
+//         const addaclinic = new mongoose.Types.ObjectId(newDocument.id);
+//         let single = await DentalDoctors.findByIdAndUpdate(req.body.doctorID, {
+//             $push: {
+//                 clinicID: addaclinic
+//             }
+//         });
+//         res.send(result);
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// };
 
 
 
 
-module.exports = {addDoctorProfile , searchDoctorsByCity, searchDoctorsByName , findOneDoctorByID, getAllDoctors};
+module.exports = { addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors };

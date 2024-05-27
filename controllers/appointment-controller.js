@@ -3,6 +3,8 @@ const DentalUser = require('../models/DentalUser.js');
 const DentalDoctors = require('../models/DentalDoctors.js');
 const NotificationArray = require('../models/NotificationArray.js');
 const DentalAppointment = require('../models/DentalAppointment.js');
+const Clinic = require('../models/Clinic.js');
+
 
 var nodemailer = require('nodemailer');
 
@@ -17,28 +19,28 @@ const addAppointmentFunction = async (req, res) => {
         const result = await newDocument.save();
 
 
-            const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);            
-            const userIDnew = new mongoose.Types.ObjectId(req.body.userID);            
-            const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
-            
-            await DentalUser.updateOne(
-                { _id: userIDnew },
-                {
-                    $push: {
-                        appointmentID: appointmentIDnew
-                    }
-                }
-            )
+        const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
+        const userIDnew = new mongoose.Types.ObjectId(req.body.userID);
+        const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
 
-            await DentalDoctors.updateOne(
-                { _id: doctorIDnew },
-                {
-                    $push: {
-                        appointmentID: appointmentIDnew
-                    }
+        await DentalUser.updateOne(
+            { _id: userIDnew },
+            {
+                $push: {
+                    appointmentID: appointmentIDnew
                 }
-            )
-            res.send(result);
+            }
+        )
+
+        await DentalDoctors.updateOne(
+            { _id: doctorIDnew },
+            {
+                $push: {
+                    appointmentID: appointmentIDnew
+                }
+            }
+        )
+        res.send(result);
 
     } catch (err) {
         res.status(500).json(err);
@@ -89,4 +91,13 @@ const getSingleAppointmwntWithDetails = async (req, res) => {
 };
 
 
-module.exports = {addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails };
+
+
+
+
+
+
+
+
+
+module.exports = { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};

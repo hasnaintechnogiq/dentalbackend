@@ -2,9 +2,9 @@ const router = require('express').Router();
 const authenticate = require('../authenticate');
 
 
-const { checkotpnow, genarateOtpandsendtoemail,  getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
-const { addDoctorProfile, searchDoctorsByCity,searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
-const { addAppointmentFunction, findAllAppointofUserByID , findAllAppointofDoctorByID, getSingleAppointmwntWithDetails} = require('../controllers/appointment-controller.js');
+const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
+const { addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
+const { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails } = require('../controllers/appointment-controller.js');
 // User routes
 
 router.get("/all-users", getAllUsers)
@@ -14,6 +14,10 @@ router.put("/update-user-detail/:_id", updateUserDetail)
 router.delete("/delete-user/:_id", deleteUser)
 router.post("/genarate-otp-and-send", genarateOtpandsendtoemail)
 router.post("/check-otp-now", checkotpnow)
+router.get("/search-user/:key", searchUserByAllDetails)
+router.post("/add-new-member", addFamilyMember)
+router.post("/find-User-Details-With-Status", findUserDetailsWithStatus)
+router.put("/update-Family-Request-Details/:_id", updateFamilyRequestDetails)
 
 // Doctor routes
 
@@ -23,6 +27,7 @@ router.post("/search-doctors-by-cities", searchDoctorsByCity)
 router.get("/search/:key", searchDoctorsByName)
 router.get("/get-single-doctor/:_id", findOneDoctorByID)
 router.get("/all-doctors", getAllDoctors)
+
 
 // Appointment routes
 

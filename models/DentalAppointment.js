@@ -16,7 +16,10 @@ const dentalappointmentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'dentalusers'
     },
-
+    clinicID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'clinic'
+    },
 });
 
 

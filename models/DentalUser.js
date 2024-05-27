@@ -22,6 +22,10 @@ const dentalusersSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'dentalappointment'
     }],
+    sendrequestID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'sendrequest'
+    }],
     role: {
         type: String,
         default: "user"
