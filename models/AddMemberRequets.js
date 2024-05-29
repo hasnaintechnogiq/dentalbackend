@@ -6,6 +6,10 @@ const sendrequestSchema = mongoose.Schema({
         type: String,
         default: "Pending"
     },
+    modeofCase: {
+        type: String,
+        default: "Normal"
+    },
     relationType: String,
     requaesterID: {
         type: mongoose.Schema.Types.ObjectId,

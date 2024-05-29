@@ -92,6 +92,18 @@ const getSingleAppointmwntWithDetails = async (req, res) => {
 
 
 
+const updateAppointmentDetails = async (req, res) => {
+    try {
+        console.log(req.params)
+        let data = await DentalAppointment.updateOne(
+            req.params,
+            { $set: req.body }
+        );
+        res.send(data);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
 
 
 
@@ -99,5 +111,4 @@ const getSingleAppointmwntWithDetails = async (req, res) => {
 
 
 
-
-module.exports = { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};
+module.exports = { updateAppointmentDetails, addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};

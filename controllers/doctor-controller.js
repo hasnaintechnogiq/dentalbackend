@@ -73,7 +73,7 @@ const searchDoctorsByName = async (req, res) => {
 
 const findOneDoctorByID = async (req, resp) => {
     try {
-        let single = await DentalDoctors.findById(req.params._id)
+        let single = await DentalDoctors.findById(req.params._id).populate("clinicID");
         resp.send(single);
     } catch (err) {
         resp.status(500).json(err);

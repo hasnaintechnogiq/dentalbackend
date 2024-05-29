@@ -7,7 +7,15 @@ const dentalappointmentSchema = mongoose.Schema({
     Bookdate: String,
     BookTime: String,
     Treatment: String,
+    Emergency: {
+        type: String,
+        default: "No"
+    },
     Details: String,
+    requestStatus: {
+        type: String,
+        default: "Pending"
+    },
     doctorID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'dentaldoctors'
