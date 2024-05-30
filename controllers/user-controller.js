@@ -28,10 +28,10 @@ const getSingleUser = async (req, resp) => {
     try {
         let single = await DentalUser.findById(req.params._id).populate({
             path: 'sendrequestID',
-            populate: {
-                path: 'requaesterID',
-                model: 'dentalusers'
-            }
+            populate: [
+                { path: 'requaesterID', model: 'dentalusers' },
+                { path: 'accepterID', model: 'dentalusers' }
+            ]
         });
         resp.send(single);
     } catch (err) {

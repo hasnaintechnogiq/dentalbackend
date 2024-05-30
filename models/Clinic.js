@@ -3,11 +3,12 @@ const jwt = require('jsonwebtoken');
 
 const clinicSchema = mongoose.Schema({
     clinicname: String,
-    cliniccity: String,
-    clinicstate: String,
+    clinicAddress: String,
     openTime: String,
     closeTime: String,
     Details: String,
+    latitude: Number,
+    longitude: Number,
     imgarry: Array,
     doctorID: [{
         type: mongoose.Schema.Types.ObjectId,

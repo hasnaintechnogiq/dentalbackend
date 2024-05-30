@@ -44,12 +44,4 @@ router.put("/update-Appointment-Details/:_id", updateAppointmentDetails)
 
 
 
-
-
-
-
-
-
-
-
 module.exports = router;
