@@ -10,13 +10,11 @@ const clinicSchema = mongoose.Schema({
     latitude: Number,
     longitude: Number,
     imgarry: Array,
-    doctorID: [{
+    doctorID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'dentaldoctors'
-    }]
+    }
 
 });
-
-
 
 module.exports = mongoose.model("clinic", clinicSchema);

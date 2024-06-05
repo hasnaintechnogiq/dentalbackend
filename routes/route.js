@@ -3,7 +3,7 @@ const authenticate = require('../authenticate');
 
 
 const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
-const { addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
+const {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
 const { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails } = require('../controllers/appointment-controller.js');
 // User routes
 
@@ -27,7 +27,7 @@ router.post("/search-doctors-by-cities", searchDoctorsByCity)
 router.get("/search/:key", searchDoctorsByName)
 router.get("/get-single-doctor/:_id", findOneDoctorByID)
 router.get("/all-doctors", getAllDoctors)
-
+router.put("/update-doctor-detail/:_id", updateDoctorDetail)
 
 // Appointment routes
 
@@ -36,9 +36,6 @@ router.get("/get-single-user-with-appointment/:_id", findAllAppointofUserByID)
 router.get("/get-single-doctor-with-appointment/:_id", findAllAppointofDoctorByID)
 router.get("/get-single-appointment-with-details/:_id", getSingleAppointmwntWithDetails)
 router.put("/update-Appointment-Details/:_id", updateAppointmentDetails)
-
-
-
 
 
 

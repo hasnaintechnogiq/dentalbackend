@@ -110,8 +110,19 @@ const getAllDoctors = async (req, res) => {
 //         res.status(500).json(err);
 //     }
 // };
+const updateDoctorDetail = async (req, res) => {
+    try {
+        console.log(req.params)
+        let data = await DentalDoctors.updateOne(
+            req.params,
+            { $set: req.body }
+        );
+        res.send(data);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
 
 
 
-
-module.exports = { addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors };
+module.exports = {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors };

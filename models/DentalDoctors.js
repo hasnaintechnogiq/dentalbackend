@@ -9,6 +9,7 @@ const dentaldoctorsSchema = mongoose.Schema({
     drdistrict: String,
     drstate: String,
     drpassword: String,
+    fcmToken: String,
     drotp: String,
     status: {
         type: String,

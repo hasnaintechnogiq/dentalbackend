@@ -6,8 +6,12 @@ var cors = require('cors')
 const DentalUser = require('./models/DentalUser.js');
 const DentalDoctors = require('./models/DentalDoctors.js');
 const Clinic = require('./models/Clinic.js');
+const bodyParser = require('body-parser');
+const schedule = require('node-schedule');
 
 
+
+const { firebase } = require('./firebase/index.js');
 
 
 
@@ -18,6 +22,8 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json());
+
 
 const Routes = require("./routes/route.js")
 
@@ -126,6 +132,105 @@ app.post("/login-dental-doctor", async (req, resp) => {
 
 
 
+
+
+
+
+app.post('/create-notification-component', async (req, res) => {
+    const { titleNew, messageNew, doctorID, UserIDforFcmToken } = req.body;
+
+    try {
+
+        if (!!doctorID) {
+            let singleUser = await DentalDoctors.findById(doctorID)
+            var fcmTokenNew = singleUser.fcmToken;
+        }
+
+        if (!!UserIDforFcmToken) {
+            let singleUser = await DentalUser.findById(UserIDforFcmToken)
+            var fcmTokenNew = singleUser.fcmToken;
+        }
+
+        await firebase.messaging().send({
+            token: fcmTokenNew,
+            notification: {
+                "title": titleNew,
+                "body": messageNew
+            }
+        })
+        console.log(req.body)
+        res.send("Done")
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+
+
+
+
+
+
+
+let reminders = [];
+console.log(reminders)
+// Endpoint to create a reminder
+app.post('/reminders', (req, res) => {
+    const { time, message, UserIDforFcmToken, doctorID } = req.body;
+
+    const reminder = { time, message, UserIDforFcmToken, doctorID };
+    reminders.push(reminder);
+    console.log(reminder)
+    // Schedule the reminder
+    schedule.scheduleJob(new Date(time), async () => {
+
+        if (!!UserIDforFcmToken) {
+            let singleUser = await DentalUser.findById(UserIDforFcmToken)
+            var fcmTokenNew = singleUser.fcmToken;
+        }
+
+        if (!!doctorID) {
+            let singleUser = await DentalDoctors.findById(doctorID)
+            var fcmTokenNew = singleUser.fcmToken;
+        }
+        try {
+            await firebase.messaging().send({
+                token: fcmTokenNew,
+                notification: {
+                    "title": "Portugal vs. Denmark",
+                    "body": message
+                }
+            })
+            console.log("Done")
+        } catch (error) {
+            console.log(error)
+        }
+        console.log('Reminder:', message);
+    });
+
+    res.status(201).send(reminder);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// setTimeout(() => {
+//     sendMassage()
+// }, 2000)
 
 
 app.use('/', Routes);

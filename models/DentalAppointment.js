@@ -7,12 +7,20 @@ const dentalappointmentSchema = mongoose.Schema({
     Bookdate: String,
     BookTime: String,
     Treatment: String,
+    Details: String,
+    remindMe: {
+        type: String,
+        default: "No"
+    },
     Emergency: {
         type: String,
         default: "No"
     },
-    Details: String,
     requestStatus: {
+        type: String,
+        default: "Pending"
+    },
+    checkInStatus: {
         type: String,
         default: "Pending"
     },
