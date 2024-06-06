@@ -6,6 +6,13 @@ var cors = require('cors')
 const DentalUser = require('./models/DentalUser.js');
 const DentalDoctors = require('./models/DentalDoctors.js');
 const Clinic = require('./models/Clinic.js');
+const DentalAppointment = require('./models/DentalAppointment.js');
+
+
+
+
+
+
 const bodyParser = require('body-parser');
 const schedule = require('node-schedule');
 
@@ -42,6 +49,52 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 app.use('/profile', express.static('upload/images'));
+
+
+
+
+
+
+app.post('/add-previus-images-documents', upload.array('images', 5), async (req, res) => {
+try {
+    const files = req.files;
+    if (!files || files.length === 0) {
+        return res.status(400).send('No files were uploaded.');
+    }
+    const formData = req.body;
+
+
+    const imgarry = files.map((file) => ({
+        originalname: file.originalname,
+        filename: file.filename,
+        path: file.path,
+        profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+    }));
+
+
+    let singleUser = await DentalAppointment.findById(formData.appointmentID)
+
+    singleUser.imgarryforUser = imgarry
+
+    singleUser.save();
+
+    console.log(singleUser)
+
+    res.json('Done');
+} catch (error) {
+    console.log(error)
+}
+
+   
+
+});
+
+
+
+
+
+
+
 
 
 

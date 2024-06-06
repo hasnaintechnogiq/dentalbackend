@@ -8,6 +8,7 @@ const dentalappointmentSchema = mongoose.Schema({
     BookTime: String,
     Treatment: String,
     Details: String,
+    imgarryforUser: Array,
     remindMe: {
         type: String,
         default: "No"
