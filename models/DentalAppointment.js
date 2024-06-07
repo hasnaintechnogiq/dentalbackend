@@ -6,9 +6,15 @@ const dentalappointmentSchema = mongoose.Schema({
     age: Number,
     Bookdate: String,
     BookTime: String,
-    Treatment: String,
-    Details: String,
+    patientName: String,
     imgarryforUser: Array,
+    Treatmentfor: String,
+    ProblemDetails: String,
+    Plan: String,
+    Bookingfor: {
+        type: String,
+        default: "Self"
+    },
     remindMe: {
         type: String,
         default: "No"
@@ -37,8 +43,11 @@ const dentalappointmentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'clinic'
     },
+    documentsformPatientsID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'DocumentPDF'
+    }],
 });
-
 
 
 module.exports = mongoose.model("dentalappointment", dentalappointmentSchema);

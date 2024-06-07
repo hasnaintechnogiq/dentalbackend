@@ -7,7 +7,7 @@ const DentalUser = require('./models/DentalUser.js');
 const DentalDoctors = require('./models/DentalDoctors.js');
 const Clinic = require('./models/Clinic.js');
 const DentalAppointment = require('./models/DentalAppointment.js');
-
+const DocumentPDF = require('./models/DocumentPDF.js');
 
 
 
@@ -84,17 +84,9 @@ try {
 } catch (error) {
     console.log(error)
 }
-
-   
+  
 
 });
-
-
-
-
-
-
-
 
 
 
@@ -150,6 +142,67 @@ app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req,
     res.send(result);
     // res.send(imgarry);
 });
+
+
+
+
+
+
+
+app.post('/upload-documents-form-patients', upload.single('document'), async (req, res) => {
+    const formData = req.body;
+    console.log(formData)
+    try {
+        const { originalname, size, mimetype, filename } = req.file;
+        const newDocument = new DocumentPDF({
+            name: originalname,
+            uri: filename,
+            type: mimetype,
+            size: size
+        });
+
+        const result = await newDocument.save();
+
+        let objID = new mongoose.Types.ObjectId(result.id);
+        let newss = new mongoose.Types.ObjectId(req.body.appointmentID)
+        console.log(objID);
+        await DentalAppointment.updateOne(
+            { _id: newss },
+            {
+                $push: {
+                    documentsformPatientsID: objID
+                }
+            }
+        )
+
+        res.json({ message: 'Document uploaded successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error uploading document' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
