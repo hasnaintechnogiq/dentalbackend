@@ -8,6 +8,7 @@ const dentalappointmentSchema = mongoose.Schema({
     BookTime: String,
     patientName: String,
     imgarryforUser: Array,
+    imgarryforDoctor: Array,
     Treatmentfor: String,
     ProblemDetails: String,
     Plan: String,
@@ -43,10 +44,14 @@ const dentalappointmentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'clinic'
     },
-    documentsformPatientsID: [{
+    documentsformDocotorID: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DocumentPDF'
     }],
+    documentsformPatientsID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'DocumentPDF'
+    }]
 });
 
 

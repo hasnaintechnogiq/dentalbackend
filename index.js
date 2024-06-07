@@ -56,37 +56,163 @@ app.use('/profile', express.static('upload/images'));
 
 
 app.post('/add-previus-images-documents', upload.array('images', 5), async (req, res) => {
-try {
-    const files = req.files;
-    if (!files || files.length === 0) {
-        return res.status(400).send('No files were uploaded.');
+    try {
+        const files = req.files;
+        if (!files || files.length === 0) {
+            return res.status(400).send('No files were uploaded.');
+        }
+        const formData = req.body;
+
+
+        const imgarry = files.map((file) => ({
+            originalname: file.originalname,
+            filename: file.filename,
+            path: file.path,
+            profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+        }));
+
+
+        let singleUser = await DentalAppointment.findById(formData.appointmentID)
+
+        singleUser.imgarryforUser = imgarry
+
+        singleUser.save();
+
+        console.log(singleUser)
+
+        res.json('Done');
+    } catch (error) {
+        console.log(error)
     }
-    const formData = req.body;
-
-
-    const imgarry = files.map((file) => ({
-        originalname: file.originalname,
-        filename: file.filename,
-        path: file.path,
-        profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
-    }));
-
-
-    let singleUser = await DentalAppointment.findById(formData.appointmentID)
-
-    singleUser.imgarryforUser = imgarry
-
-    singleUser.save();
-
-    console.log(singleUser)
-
-    res.json('Done');
-} catch (error) {
-    console.log(error)
-}
-  
-
 });
+
+
+
+
+
+
+app.post('/add-treament-images-from-doctor', upload.array('images', 5), async (req, res) => {
+    try {
+        const files = req.files;
+        if (!files || files.length === 0) {
+            return res.status(400).send('No files were uploaded.');
+        }
+        const formData = req.body;
+
+        const imgarry = files.map((file) => ({
+            originalname: file.originalname,
+            filename: file.filename,
+            path: file.path,
+            profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+        }));
+
+        let singleUser = await DentalAppointment.findById(formData.appointmentID)
+
+        singleUser.imgarryforDoctor = imgarry
+
+        singleUser.save();
+
+        console.log(singleUser)
+
+        res.json('Done');
+    } catch (error) {
+        console.log(error)
+    }
+}
+);
+
+
+
+
+app.post('/upload-documents-form-patients', upload.single('document'), async (req, res) => {
+    const formData = req.body;
+    console.log(formData)
+    try {
+        const { originalname, size, mimetype, filename } = req.file;
+        const newDocument = new DocumentPDF({
+            name: originalname,
+            uri: filename,
+            type: mimetype,
+            size: size
+        });
+
+        const result = await newDocument.save();
+
+        let objID = new mongoose.Types.ObjectId(result.id);
+        let newss = new mongoose.Types.ObjectId(req.body.appointmentID)
+        console.log(objID);
+        await DentalAppointment.updateOne(
+            { _id: newss },
+            {
+                $push: {
+                    documentsformPatientsID: objID
+                }
+            }
+        )
+
+        res.json({ message: 'Document uploaded successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error uploading document' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+app.post('/upload-documents-form-doctor', upload.single('document'), async (req, res) => {
+    const formData = req.body;
+    console.log(formData)
+    try {
+        const { originalname, size, mimetype, filename } = req.file;
+        const newDocument = new DocumentPDF({
+            name: originalname,
+            uri: filename,
+            type: mimetype,
+            size: size
+        });
+
+        const result = await newDocument.save();
+
+        let objID = new mongoose.Types.ObjectId(result.id);
+        let newss = new mongoose.Types.ObjectId(req.body.appointmentID)
+        console.log(objID);
+        await DentalAppointment.updateOne(
+            { _id: newss },
+            {
+                $push: {
+                    documentsformDocotorID: objID
+                }
+            }
+        )
+
+        res.json({ message: 'Document uploaded successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error uploading document' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -137,60 +263,9 @@ app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req,
             }
         }
     )
-
-
     res.send(result);
     // res.send(imgarry);
 });
-
-
-
-
-
-
-
-app.post('/upload-documents-form-patients', upload.single('document'), async (req, res) => {
-    const formData = req.body;
-    console.log(formData)
-    try {
-        const { originalname, size, mimetype, filename } = req.file;
-        const newDocument = new DocumentPDF({
-            name: originalname,
-            uri: filename,
-            type: mimetype,
-            size: size
-        });
-
-        const result = await newDocument.save();
-
-        let objID = new mongoose.Types.ObjectId(result.id);
-        let newss = new mongoose.Types.ObjectId(req.body.appointmentID)
-        console.log(objID);
-        await DentalAppointment.updateOne(
-            { _id: newss },
-            {
-                $push: {
-                    documentsformPatientsID: objID
-                }
-            }
-        )
-
-        res.json({ message: 'Document uploaded successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error uploading document' });
-    }
-});
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -303,7 +378,7 @@ app.post('/reminders', (req, res) => {
             await firebase.messaging().send({
                 token: fcmTokenNew,
                 notification: {
-                    "title": "Portugal vs. Denmark",
+                    "title": "Dental Tittle",
                     "body": message
                 }
             })
