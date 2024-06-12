@@ -53,11 +53,11 @@ const findAllAppointofUserByID = async (req, resp) => {
     try {
         let single = await DentalUser.findById(req.params._id).populate({
             path: 'appointmentID',
-            populate: {
-                path: 'doctorID',
-                model: 'dentaldoctors'
-            }
-        })
+            populate: [
+                { path: 'userID', model: 'dentalusers' },
+                { path: 'doctorID', model: 'dentaldoctors' }
+            ]
+        });
         resp.send(single);
     } catch (err) {
         resp.status(500).json(err);
@@ -69,11 +69,11 @@ const findAllAppointofDoctorByID = async (req, resp) => {
     try {
         let single = await DentalDoctors.findById(req.params._id).populate({
             path: 'appointmentID',
-            populate: {
-                path: 'userID',
-                model: 'dentalusers'
-            }
-        })
+            populate: [
+                { path: 'userID', model: 'dentalusers' },
+                { path: 'doctorID', model: 'dentaldoctors' }
+            ]
+        });
         resp.send(single);
     } catch (err) {
         resp.status(500).json(err);
