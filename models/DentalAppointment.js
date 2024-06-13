@@ -12,6 +12,9 @@ const dentalappointmentSchema = mongoose.Schema({
     Treatmentfor: String,
     ProblemDetails: String,
     Plan: String,
+    Bloodpressure: String,
+    diabetes: String,
+    Weight: Number,
     Bookingfor: {
         type: String,
         default: "Self"
@@ -26,7 +29,7 @@ const dentalappointmentSchema = mongoose.Schema({
     },
     requestStatus: {
         type: String,
-        default: "Pending"
+        default: "Completed"
     },
     checkInStatus: {
         type: String,

@@ -9,7 +9,7 @@ const Clinic = require('./models/Clinic.js');
 const DentalAppointment = require('./models/DentalAppointment.js');
 const DocumentPDF = require('./models/DocumentPDF.js');
 
-
+const XLSX = require('xlsx');
 
 
 
@@ -49,6 +49,65 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 app.use('/profile', express.static('upload/images'));
+
+
+
+
+app.post('/excel-to-appointment', upload.single('file'), async (req, res) => {
+    const formData = req.body;
+    try {
+        const workbook = XLSX.readFile(req.file.path);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+        const doctorIDnew = new mongoose.Types.ObjectId(formData.doctorID);
+
+
+
+        async function sitevisitcallnowChacks() {
+            for (let i = 0; i < jsonData.length; i++) {
+                const entry = jsonData[i];
+                const newDocument = new DentalAppointment(entry);
+                const result = await newDocument.save();
+                const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
+    
+                await DentalDoctors.updateOne(
+                    { _id: doctorIDnew },
+                    {
+                        $push: {
+                            appointmentID: appointmentIDnew
+                        }
+                    }
+                )
+    
+            }
+        }
+        sitevisitcallnowChacks();
+
+
+
+        // Insert data into MongoDB
+        // await DentalAppointment.insertMany(jsonData);
+
+        res.status(200).send('File uploaded and data imported successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while uploading the file');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

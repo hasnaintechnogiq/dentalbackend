@@ -55,7 +55,8 @@ const findAllAppointofUserByID = async (req, resp) => {
             path: 'appointmentID',
             populate: [
                 { path: 'userID', model: 'dentalusers' },
-                { path: 'doctorID', model: 'dentaldoctors' }
+                { path: 'doctorID', model: 'dentaldoctors' },
+                { path: 'clinicID', model: 'clinic' }
             ]
         });
         resp.send(single);
@@ -71,7 +72,8 @@ const findAllAppointofDoctorByID = async (req, resp) => {
             path: 'appointmentID',
             populate: [
                 { path: 'userID', model: 'dentalusers' },
-                { path: 'doctorID', model: 'dentaldoctors' }
+                { path: 'doctorID', model: 'dentaldoctors' },
+                { path: 'clinicID', model: 'clinic' }
             ]
         });
         resp.send(single);
@@ -83,7 +85,7 @@ const findAllAppointofDoctorByID = async (req, resp) => {
 
 const getSingleAppointmwntWithDetails = async (req, res) => {
     try {
-        let single = await DentalAppointment.findById(req.params._id).populate("doctorID").populate("userID").populate("documentsformPatientsID").populate("documentsformDocotorID");
+        let single = await DentalAppointment.findById(req.params._id).populate("doctorID").populate("userID").populate("documentsformPatientsID").populate("documentsformDocotorID").populate("clinicID");
         res.send(single);
     } catch (err) {
         res.status(500).json(err);
