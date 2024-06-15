@@ -8,10 +8,10 @@ const DentalDoctors = require('./models/DentalDoctors.js');
 const Clinic = require('./models/Clinic.js');
 const DentalAppointment = require('./models/DentalAppointment.js');
 const DocumentPDF = require('./models/DocumentPDF.js');
+const OldTreatmentHistory = require('./models/OldTreatmentHistory.js');
+
 
 const XLSX = require('xlsx');
-
-
 
 const bodyParser = require('body-parser');
 const schedule = require('node-schedule');
@@ -63,12 +63,10 @@ app.post('/excel-to-appointment', upload.single('file'), async (req, res) => {
 
         const doctorIDnew = new mongoose.Types.ObjectId(formData.doctorID);
 
-
-
         async function sitevisitcallnowChacks() {
             for (let i = 0; i < jsonData.length; i++) {
                 const entry = jsonData[i];
-                const newDocument = new DentalAppointment(entry);
+                const newDocument = new OldTreatmentHistory(entry);
                 const result = await newDocument.save();
                 const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
     
@@ -76,7 +74,7 @@ app.post('/excel-to-appointment', upload.single('file'), async (req, res) => {
                     { _id: doctorIDnew },
                     {
                         $push: {
-                            appointmentID: appointmentIDnew
+                            oldtreatmenthistoryID: appointmentIDnew
                         }
                     }
                 )
@@ -85,10 +83,6 @@ app.post('/excel-to-appointment', upload.single('file'), async (req, res) => {
         }
         sitevisitcallnowChacks();
 
-
-
-        // Insert data into MongoDB
-        // await DentalAppointment.insertMany(jsonData);
 
         res.status(200).send('File uploaded and data imported successfully');
     } catch (error) {

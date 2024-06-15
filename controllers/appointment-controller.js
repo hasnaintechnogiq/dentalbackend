@@ -4,7 +4,7 @@ const DentalDoctors = require('../models/DentalDoctors.js');
 const NotificationArray = require('../models/NotificationArray.js');
 const DentalAppointment = require('../models/DentalAppointment.js');
 const Clinic = require('../models/Clinic.js');
-
+const OldTreatmentHistory = require('../models/OldTreatmentHistory.js');
 
 var nodemailer = require('nodemailer');
 
@@ -75,7 +75,7 @@ const findAllAppointofDoctorByID = async (req, resp) => {
                 { path: 'doctorID', model: 'dentaldoctors' },
                 { path: 'clinicID', model: 'clinic' }
             ]
-        });
+        }).populate("oldtreatmenthistoryID");
         resp.send(single);
     } catch (err) {
         resp.status(500).json(err);
@@ -108,9 +108,18 @@ const updateAppointmentDetails = async (req, res) => {
 };
 
 
+const findOneOldTreatmentByID = async (req, resp) => {
+    try {
+        let single = await OldTreatmentHistory.findById(req.params._id);
+        resp.send(single);
+    } catch (err) {
+        resp.status(500).json(err);
+    }
+};
 
 
 
 
 
-module.exports = { updateAppointmentDetails, addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};
+
+module.exports = { findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};

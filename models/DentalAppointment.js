@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
 
 const dentalappointmentSchema = mongoose.Schema({
     gender: String,
@@ -29,7 +28,7 @@ const dentalappointmentSchema = mongoose.Schema({
     },
     requestStatus: {
         type: String,
-        default: "Completed"
+        default: "Pending"
     },
     checkInStatus: {
         type: String,

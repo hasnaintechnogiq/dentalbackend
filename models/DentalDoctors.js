@@ -27,6 +27,10 @@ const dentaldoctorsSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'dentalappointment'
     }],
+    oldtreatmenthistoryID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'oldtreatmenthistory'
+    }],
     clinicID: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'clinic'

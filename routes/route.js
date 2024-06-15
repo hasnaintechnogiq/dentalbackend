@@ -4,7 +4,7 @@ const authenticate = require('../authenticate');
 
 const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
 const {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
-const { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails } = require('../controllers/appointment-controller.js');
+const { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails , findOneOldTreatmentByID} = require('../controllers/appointment-controller.js');
 // User routes
 
 router.get("/all-users", getAllUsers)
@@ -36,7 +36,7 @@ router.get("/get-single-user-with-appointment/:_id", findAllAppointofUserByID)
 router.get("/get-single-doctor-with-appointment/:_id", findAllAppointofDoctorByID)
 router.get("/get-single-appointment-with-details/:_id", getSingleAppointmwntWithDetails)
 router.put("/update-Appointment-Details/:_id", updateAppointmentDetails)
-
+router.get("/find-One-Old-Treatment-By-ID/:_id", findOneOldTreatmentByID)
 
 
 
