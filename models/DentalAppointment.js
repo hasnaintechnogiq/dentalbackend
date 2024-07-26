@@ -14,6 +14,10 @@ const dentalappointmentSchema = mongoose.Schema({
     Bloodpressure: String,
     diabetes: String,
     Weight: Number,
+    secondarychatArrayID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'secondaryarrayofchats'
+    },
     Bookingfor: {
         type: String,
         default: "Self"

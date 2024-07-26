@@ -45,13 +45,13 @@ const addNewUser = async (req, res) => {
     console.log(req.body);
     try {
         let existingTeacherByEmail = await DentalUser.find({ email })
-        let user = new DentalUser(req.body);
+
 
         if (existingTeacherByEmail.length > 0) {
             res.send('Email already exists');
             console.log("Email already exists")
         } else {
-
+            let user = new DentalUser(req.body);
             const newDocument = new NotificationArray();
             const notifiArray = await newDocument.save();
 

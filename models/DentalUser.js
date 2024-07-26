@@ -35,6 +35,10 @@ const dentalusersSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'notificationarray'
     },
+    chatArrayID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'secondaryarrayofchats'
+    }],
     tokens: [
         {
             token: {
