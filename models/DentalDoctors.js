@@ -11,6 +11,7 @@ const dentaldoctorsSchema = mongoose.Schema({
     drpassword: String,
     fcmToken: String,
     drotp: String,
+    profile_url: String,
     status: {
         type: String,
         default: "login"

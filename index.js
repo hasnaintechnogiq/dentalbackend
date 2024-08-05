@@ -144,6 +144,109 @@ app.post('/add-previus-images-documents', upload.array('images', 5), async (req,
 
 
 
+
+
+// Upload image for profile for Doctor start
+
+
+app.post('/upload-profile-image-for-doctor-new', upload.single('image'), async (req, res) => {
+    const files = req.file;
+    try {
+        if (!files || files.length === 0) {
+            return res.status(400).send('No files were uploaded.');
+        }
+        const formData = req.body;
+        const profile_url = `https://dentalbackend-3gjq.onrender.com/profile/${files.filename}`;
+        console.log(profile_url)
+        let singleUser = await DentalDoctors.findById(formData.doctorID)
+
+        singleUser.profile_url = profile_url
+
+        singleUser.save();
+
+        res.json({ message: 'Image uploaded successfully' });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error uploading image', error });
+    }
+});
+
+
+// Upload image for profile for Doctor end
+
+
+
+
+
+
+
+
+// Upload image for profile for patients start
+
+
+app.post('/upload-profile-image-for-patient', upload.single('image'), async (req, res) => {
+    const files = req.file;
+    try {
+        if (!files || files.length === 0) {
+            return res.status(400).send('No files were uploaded.');
+        }
+        const formData = req.body;
+        const profile_url = `https://dentalbackend-3gjq.onrender.com/profile/${files.filename}`;
+        console.log(profile_url)
+        let singleUser = await DentalUser.findById(formData.userID)
+
+        singleUser.profile_url = profile_url
+
+        singleUser.save();
+
+        res.json({ message: 'Image uploaded successfully' });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error uploading image', error });
+    }
+});
+
+
+// Upload image for profile for patients end
+
+
+
+app.get("/doctor-profile-picture/:_id", async (req, resp) => {
+    try {
+        let single = await DentalDoctors.findOne({ _id: req.params._id }).select("-password")
+        resp.send(single);
+    } catch (err) {
+        resp.status(500).json(err);
+    }
+});
+
+app.get("/patients-profile-picture/:_id", async (req, resp) => {
+    try {
+        let single = await DentalUser.findOne({ _id: req.params._id }).select("-password")
+        resp.send(single);
+    } catch (err) {
+        resp.status(500).json(err);
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.post('/add-treament-images-from-doctor', upload.array('images', 5), async (req, res) => {
     try {
         const files = req.files;
