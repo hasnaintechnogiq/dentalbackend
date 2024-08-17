@@ -9,7 +9,7 @@ const Clinic = require('./models/Clinic.js');
 const DentalAppointment = require('./models/DentalAppointment.js');
 const DocumentPDF = require('./models/DocumentPDF.js');
 const OldTreatmentHistory = require('./models/OldTreatmentHistory.js');
-
+const Staffs = require('./models/Staffs.js');
 
 const XLSX = require('xlsx');
 
@@ -468,6 +468,14 @@ app.post("/login-dental-doctor", async (req, resp) => {
 
 
 
+app.post("/login-dental-staff", async (req, resp) => {
+    if (req.body.email && req.body.password) {
+        let user = await Staffs.findOne(req.body).select("-password")
+        if (user) {
+            resp.send(user);
+        } else { resp.send("no data found") }
+    } else { resp.send("enter email and pass") }
+});
 
 
 

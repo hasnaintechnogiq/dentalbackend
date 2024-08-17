@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 
 const dentaldoctorsSchema = mongoose.Schema({
     drname: String,
+    designation: String,
+    biography: String,
+    yearsofexperience: Number,
+    patientchecked: Number,
     drnumber: Number,
     dremail: String,
     drcity: String,
@@ -39,6 +43,14 @@ const dentaldoctorsSchema = mongoose.Schema({
     chatArrayID: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'secondaryarrayofchats'
+    }],
+    ratingIDs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ratingCounter'
+    }],
+    staffIDs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'staffs'
     }],
     tokens: [
         {

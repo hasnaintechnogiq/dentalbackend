@@ -85,7 +85,7 @@ const findAllAppointofDoctorByID = async (req, resp) => {
 
 const getSingleAppointmwntWithDetails = async (req, res) => {
     try {
-        let single = await DentalAppointment.findById(req.params._id).populate("doctorID").populate("userID").populate("documentsformPatientsID").populate("documentsformDocotorID").populate("clinicID");
+        let single = await DentalAppointment.findById(req.params._id).populate("doctorID").populate("userID").populate("documentsformPatientsID").populate("documentsformDocotorID").populate("clinicID").populate("ratingID");
         res.send(single);
     } catch (err) {
         res.status(500).json(err);

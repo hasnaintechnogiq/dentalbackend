@@ -60,7 +60,7 @@ const searchDoctorsByName = async (req, res) => {
                 { drname: { $regex: req.params.key, $options: "i" } },
                 { dremail: { $regex: req.params.key, $options: "i" } }
             ]
-        });
+        }).populate("ratingIDs");
         res.send(result);
 
     } catch (err) {
@@ -83,7 +83,7 @@ const findOneDoctorByID = async (req, resp) => {
 
 const getAllDoctors = async (req, res) => {
     try {
-        let project = await DentalDoctors.find()
+        let project = await DentalDoctors.find().populate("ratingIDs");
         const firstTenObjects = project.slice(0, 6);
         res.send(firstTenObjects)
     } catch (err) {

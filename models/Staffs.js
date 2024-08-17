@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
-const dentalusersSchema = mongoose.Schema({
+const staffsSchema = mongoose.Schema({
     name: String,
     number: Number,
     email: {
@@ -9,7 +9,7 @@ const dentalusersSchema = mongoose.Schema({
         maxlength: 1024,
         required: [true, "Please provide an email"],
         unique: [true, "email already exists"],
-      },
+    },
     city: String,
     age: String,
     gender: String,
@@ -18,25 +18,47 @@ const dentalusersSchema = mongoose.Schema({
     otp: String,
     fcmToken: String,
     profile_url: String,
+    checkInTime: String,
+    checkOutTime: String,
+    assignAs: {
+        type: String,
+        default: "Receptionist"
+    },
+    CanAcceptAppointment: {
+        type: String,
+        default: "No"
+    },
+    CanAddAppointment: {
+        type: String,
+        default: "No"
+    },
+    CanUpdateRecivedPaymentAppointment: {
+        type: String,
+        default: "No"
+    },
+    CanSendTickets: {
+        type: String,
+        default: "No"
+    },
     status: {
         type: String,
         default: "login"
     },
-    appointmentID: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'dentalappointment'
-    }],
-    sendrequestID: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'sendrequest'
-    }],
     role: {
         type: String,
-        default: "user"
+        default: "staff"
+    },
+    clinicID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'clinic'
     },
     notificationarrayID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'notificationarray'
+    },
+    doctorID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'dentaldoctors'
     },
     chatArrayID: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -54,4 +76,4 @@ const dentalusersSchema = mongoose.Schema({
 
 
 
-module.exports = mongoose.model("dentalusers", dentalusersSchema);
+module.exports = mongoose.model("staffs", staffsSchema);

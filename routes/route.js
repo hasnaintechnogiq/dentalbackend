@@ -6,6 +6,9 @@ const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, 
 const {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
 const { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails , findOneOldTreatmentByID} = require('../controllers/appointment-controller.js');
 const { createArrayforChat , addNewChat, getChatDetails, getOneUserChat, getOneDoctorChat} = require('../controllers/chat-controller.js');
+const { addStaffFunction , findAllStaffofDoctorByID ,findOneStaffByID} = require('../controllers/staff-controller.js');
+const { createArrayforRating, getOneDoctorAllRatings } = require('../controllers/extra-controller.js');
+
 
 // User routes
 
@@ -48,6 +51,34 @@ router.post("/add-new-chat", addNewChat)
 router.get("/get-chat-with-details/:_id", getChatDetails)
 router.get("/get-one-user-chat/:_id", getOneUserChat)
 router.get("/get-one-doctor-chat/:_id", getOneDoctorChat)
+
+
+
+
+// Staff routes
+
+
+
+router.post("/add-new-staff", addStaffFunction)
+router.get("/get-doctor-with-staff/:_id", findAllStaffofDoctorByID)
+router.get("/get-one-staff-with-details/:_id", findOneStaffByID)
+
+
+
+
+
+
+
+// Extra routes
+
+
+router.post("/create-array-for-rating-appointment", createArrayforRating)
+router.get("/get-one-doctor-all-rating/:_id", getOneDoctorAllRatings)
+
+
+
+
+
 
 
 module.exports = router;

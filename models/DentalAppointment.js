@@ -50,6 +50,10 @@ const dentalappointmentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'clinic'
     },
+    ratingID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ratingCounter'
+    },
     documentsformDocotorID: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DocumentPDF'
