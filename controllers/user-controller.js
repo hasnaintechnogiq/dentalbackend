@@ -35,7 +35,7 @@ const getSingleUser = async (req, resp) => {
         });
         resp.send(single);
     } catch (err) {
-        res.status(500).json(err);
+        resp.status(500).json(err);
     }
 };
 

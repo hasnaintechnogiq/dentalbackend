@@ -3,11 +3,11 @@ const authenticate = require('../authenticate');
 
 
 const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
-const {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
-const { addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails , findOneOldTreatmentByID} = require('../controllers/appointment-controller.js');
-const { createArrayforChat , addNewChat, getChatDetails, getOneUserChat, getOneDoctorChat} = require('../controllers/chat-controller.js');
-const { addStaffFunction , findAllStaffofDoctorByID ,findOneStaffByID} = require('../controllers/staff-controller.js');
-const { createArrayforRating, getOneDoctorAllRatings } = require('../controllers/extra-controller.js');
+const { findOneClinicByID, updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
+const { addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails, findOneOldTreatmentByID } = require('../controllers/appointment-controller.js');
+const { createArrayforChat, addNewChat, getChatDetails, getOneUserChat, getOneDoctorChat } = require('../controllers/chat-controller.js');
+const { addStaffFunction, findAllStaffofDoctorByID, findOneStaffByID } = require('../controllers/staff-controller.js');
+const { createArrayforRating, getOneDoctorAllRatings, addNewTicket } = require('../controllers/extra-controller.js');
 
 
 // User routes
@@ -33,10 +33,13 @@ router.get("/search/:key", searchDoctorsByName)
 router.get("/get-single-doctor/:_id", findOneDoctorByID)
 router.get("/all-doctors", getAllDoctors)
 router.put("/update-doctor-detail/:_id", updateDoctorDetail)
+router.get("/get-single-clinic/:_id", findOneClinicByID)
+
 
 // Appointment routes
 
 router.post("/book-appointment", addAppointmentFunction)
+router.post("/book-appointment-without-user", addAppointmentWithoutUser)
 router.get("/get-single-user-with-appointment/:_id", findAllAppointofUserByID)
 router.get("/get-single-doctor-with-appointment/:_id", findAllAppointofDoctorByID)
 router.get("/get-single-appointment-with-details/:_id", getSingleAppointmwntWithDetails)
@@ -74,7 +77,7 @@ router.get("/get-one-staff-with-details/:_id", findOneStaffByID)
 
 router.post("/create-array-for-rating-appointment", createArrayforRating)
 router.get("/get-one-doctor-all-rating/:_id", getOneDoctorAllRatings)
-
+router.post("/create-ticket", addNewTicket)
 
 
 

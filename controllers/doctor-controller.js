@@ -125,4 +125,23 @@ const updateDoctorDetail = async (req, res) => {
 
 
 
-module.exports = {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors };
+
+const findOneClinicByID = async (req, resp) => {
+    try {
+        let single = await Clinic.findById(req.params._id);
+        resp.send(single);
+    } catch (err) {
+        resp.status(500).json(err);
+    }
+};
+
+
+
+
+
+
+
+
+
+
+module.exports = {updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors , findOneClinicByID};

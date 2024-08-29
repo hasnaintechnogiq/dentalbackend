@@ -14,6 +14,18 @@ const dentalappointmentSchema = mongoose.Schema({
     Bloodpressure: String,
     diabetes: String,
     Weight: Number,
+    PayStatus: {
+        type: String,
+        default: "Pending"
+    },
+    PayAmount: {
+        type: Number,
+        default: 0
+    },
+    PayType: {
+        type: String,
+        default: "Online"
+    },
     secondarychatArrayID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'secondaryarrayofchats'

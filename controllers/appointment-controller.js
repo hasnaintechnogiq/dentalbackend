@@ -49,6 +49,36 @@ const addAppointmentFunction = async (req, res) => {
 
 
 
+
+
+const addAppointmentWithoutUser = async (req, res) => {
+    try {
+
+        const newDocument = new DentalAppointment(req.body);
+        const result = await newDocument.save();
+
+
+        const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
+
+        const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
+
+        await DentalDoctors.updateOne(
+            { _id: doctorIDnew },
+            {
+                $push: {
+                    appointmentID: appointmentIDnew
+                }
+            }
+        )
+        res.send(result);
+
+    } catch (err) {
+        res.status(500).json(err);
+    }
+};
+
+
+
 const findAllAppointofUserByID = async (req, resp) => {
     try {
         let single = await DentalUser.findById(req.params._id).populate({
@@ -73,7 +103,8 @@ const findAllAppointofDoctorByID = async (req, resp) => {
             populate: [
                 { path: 'userID', model: 'dentalusers' },
                 { path: 'doctorID', model: 'dentaldoctors' },
-                { path: 'clinicID', model: 'clinic' }
+                { path: 'clinicID', model: 'clinic' },
+                { path: 'ratingID', model: 'ratingCounter' }
             ]
         }).populate("oldtreatmenthistoryID");
         resp.send(single);
@@ -122,4 +153,4 @@ const findOneOldTreatmentByID = async (req, resp) => {
 
 
 
-module.exports = { findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};
+module.exports = { findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};

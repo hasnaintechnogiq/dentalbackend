@@ -3,7 +3,7 @@ const DentalUser = require('../models/DentalUser.js');
 const DentalDoctors = require('../models/DentalDoctors.js');
 const Rating = require('../models/Rating.js');
 const DentalAppointment = require('../models/DentalAppointment.js');
-
+const Ticket = require('../models/Ticket.js');
 
 
 
@@ -71,4 +71,32 @@ const getOneDoctorAllRatings = async (req, res) => {
 
 
 
-module.exports = { createArrayforRating, getOneDoctorAllRatings };
+
+// Ticket Start 
+
+
+
+const addNewTicket = async (req, res) => {
+
+    try {
+        let project = new Ticket(req.body);
+        const result = await project.save();
+        res.send(result);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { createArrayforRating, getOneDoctorAllRatings , addNewTicket};
