@@ -37,6 +37,16 @@ const createArrayforRating = async (req, res) => {
                 }
             }
         )
+
+
+
+        let dubleNow = await DentalDoctors.findById(doctorIDnew)
+
+        dubleNow.NotificationNewFeedback = "Unseen";
+        await dubleNow.save();
+
+
+
         res.send(resultfirst);
 
     } catch (err) {

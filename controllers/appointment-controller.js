@@ -5,8 +5,9 @@ const NotificationArray = require('../models/NotificationArray.js');
 const DentalAppointment = require('../models/DentalAppointment.js');
 const Clinic = require('../models/Clinic.js');
 const OldTreatmentHistory = require('../models/OldTreatmentHistory.js');
+const Prescription = require('../models/Prescription.js');
 
-var nodemailer = require('nodemailer');
+
 
 
 
@@ -22,6 +23,7 @@ const addAppointmentFunction = async (req, res) => {
         const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
         const userIDnew = new mongoose.Types.ObjectId(req.body.userID);
         const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
+
 
         await DentalUser.updateOne(
             { _id: userIDnew },
@@ -40,6 +42,16 @@ const addAppointmentFunction = async (req, res) => {
                 }
             }
         )
+
+        let single = await DentalDoctors.findById(req.body.doctorID)
+
+        single.NotificationNewAppoint = "Unseen";
+        await single.save();
+
+
+
+
+
         res.send(result);
 
     } catch (err) {
@@ -150,7 +162,51 @@ const findOneOldTreatmentByID = async (req, resp) => {
 
 
 
+const addnoePrescription = async (req, resp) => {
+    try {
+
+        let single = await DentalAppointment.findById(req.body.appointmentID);
+        console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhh', single)
+
+        single.advice = req.body.advice;
+
+        single.note = req.body.note;
+        await single.save();
+
+        async function SpriscriptinfunCall() {
+            for (let i = 0; i < req.body.valuable.length; i++) {
+                try {
+                    const newDatanewtask = new Prescription(req.body.valuable[i]);
+                    const savedData = await newDatanewtask.save();
+
+                    let objID = new mongoose.Types.ObjectId(newDatanewtask.id)
+                    let newss = new mongoose.Types.ObjectId(req.body.appointmentID)
+                    console.log(objID);
+                    await DentalAppointment.updateOne(
+                        { _id: newss },
+                        {
+                            $push: {
+                                prescriptionID: objID
+                            }
+                        }
+                    )
+                    console.log('Data saved:', savedData);
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                }
+            }
+        }
+        SpriscriptinfunCall();
+
+        resp.send(single);
+    } catch (err) {
+        resp.status(500).json(err);
+    }
+};
 
 
 
-module.exports = { findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails};
+
+
+
+module.exports = {addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails };

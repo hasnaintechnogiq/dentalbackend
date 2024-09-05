@@ -16,6 +16,18 @@ const dentaldoctorsSchema = mongoose.Schema({
     fcmToken: String,
     drotp: String,
     profile_url: String,
+    NotificationNewAppoint: {
+        type: String,
+        default: "Seen"
+    },
+    NotificationCancilAppoint: {
+        type: String,
+        default: "Seen"
+    },
+    NotificationNewFeedback: {
+        type: String,
+        default: "Seen"
+    },
     status: {
         type: String,
         default: "login"

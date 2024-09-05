@@ -14,6 +14,8 @@ const dentalappointmentSchema = mongoose.Schema({
     Bloodpressure: String,
     diabetes: String,
     Weight: Number,
+    advice: String,
+    note: String,
     PayStatus: {
         type: String,
         default: "Pending"
@@ -73,7 +75,11 @@ const dentalappointmentSchema = mongoose.Schema({
     documentsformPatientsID: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DocumentPDF'
-    }]
+    }],
+    prescriptionID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'prescription'
+    }],
 });
 
 

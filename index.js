@@ -568,11 +568,6 @@ app.post('/reminders', (req, res) => {
 
 
 
-
-
-
-
-
 // setTimeout(() => {
 //     sendMassage()
 // }, 2000)
