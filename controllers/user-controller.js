@@ -80,12 +80,44 @@ const updateUserDetail = async (req, res) => {
     }
 };
 
+/**
+ * Deletes a user from the database
+ * @param {Object} req - Express request object containing user ID in params
+ * @param {Object} res - Express response object
+ * @returns {Object} Response with success/error message
+ */
 const deleteUser = async (req, res) => {
     try {
-        let data = await DentalUser.deleteOne(req.params);
-        res.send(data);
+        const { _id } = req.params;
+        
+        if (!_id) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+
+        const result = await DentalUser.deleteOne({ _id });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'User deleted successfully',
+            data: result
+        });
     } catch (error) {
-        res.status(500).json(error);
+        console.error('Error deleting user:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
     }
 };
 

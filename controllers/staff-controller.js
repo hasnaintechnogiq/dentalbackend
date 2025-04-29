@@ -72,6 +72,25 @@ const findOneStaffByID = async (req, resp) => {
     }
 };
 
+const updateStaffFunction = async (req, res) => {
+    try {
+        const staffId = req.params._id;
+        const updatedData = req.body;
+        
+        const result = await Staffs.findByIdAndUpdate(
+            staffId,
+            { $set: updatedData },
+            { new: true }
+        ).populate("clinicID");
 
+        if (!result) {
+            return res.status(404).json({ message: "Staff not found" });
+        }
 
-module.exports = { addStaffFunction, findAllStaffofDoctorByID, findOneStaffByID };
+        res.send(result);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+};
+
+module.exports = { addStaffFunction, findAllStaffofDoctorByID, findOneStaffByID, updateStaffFunction };

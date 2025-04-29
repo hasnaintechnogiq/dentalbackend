@@ -574,6 +574,39 @@ app.post('/reminders', (req, res) => {
 
 
 app.use('/', Routes);
+
+app.post('/update-clinic-details', upload.array('images', 5), async (req, res) => {
+    try {
+        const { clinicId, ...updateData } = req.body;
+        let updateObject = { ...updateData };
+
+        if (req.files && req.files.length > 0) {
+            const imgarry = req.files.map((file) => ({
+                originalname: file.originalname,
+                filename: file.filename,
+                path: file.path,
+                profile_url: `https://dental-app-nvzl4.ondigitalocean.app/profile/${file.filename}`
+            }));
+            updateObject.imgarry = imgarry;
+        }
+
+        const updatedClinic = await Clinic.findByIdAndUpdate(
+            clinicId,
+            { $set: updateObject },
+            { new: true }
+        );
+
+        if (!updatedClinic) {
+            return res.status(404).json({ message: 'Clinic not found' });
+        }
+
+        res.json(updatedClinic);
+    } catch (error) {
+        console.error('Error updating clinic:', error);
+        res.status(500).json({ message: 'Error updating clinic details' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)
 })

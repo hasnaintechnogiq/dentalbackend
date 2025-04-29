@@ -7,89 +7,135 @@ const Clinic = require('../models/Clinic.js');
 const OldTreatmentHistory = require('../models/OldTreatmentHistory.js');
 const Prescription = require('../models/Prescription.js');
 
-
-
-
-
-
-
+/**
+ * Creates a new appointment and updates related doctor and user records
+ * @param {Object} req - Express request object containing appointment details
+ * @param {Object} res - Express response object
+ * @returns {Object} Response with appointment details or error message
+ */
 const addAppointmentFunction = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
+        const { doctorID, userID, ...appointmentData } = req.body;
 
-        const newDocument = new DentalAppointment(req.body);
-        const result = await newDocument.save();
+        // Validate required fields
+        if (!doctorID || !userID) {
+            return res.status(400).json({
+                success: false,
+                message: 'Doctor ID and User ID are required'
+            });
+        }
 
+        // Create new appointment
+        const newAppointment = new DentalAppointment({
+            ...appointmentData,
+            doctorID,
+            userID
+        });
 
-        const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
-        const userIDnew = new mongoose.Types.ObjectId(req.body.userID);
-        const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
+        const savedAppointment = await newAppointment.save({ session });
 
-
+        // Update user's appointments
         await DentalUser.updateOne(
-            { _id: userIDnew },
-            {
-                $push: {
-                    appointmentID: appointmentIDnew
-                }
-            }
-        )
+            { _id: userID },
+            { $push: { appointmentID: savedAppointment._id } },
+            { session }
+        );
 
+        // Update doctor's appointments and notification
         await DentalDoctors.updateOne(
-            { _id: doctorIDnew },
-            {
-                $push: {
-                    appointmentID: appointmentIDnew
-                }
-            }
-        )
+            { _id: doctorID },
+            { 
+                $push: { appointmentID: savedAppointment._id },
+                NotificationNewAppoint: "Unseen"
+            },
+            { session }
+        );
 
-        let single = await DentalDoctors.findById(req.body.doctorID)
+        await session.commitTransaction();
 
-        single.NotificationNewAppoint = "Unseen";
-        await single.save();
+        return res.status(201).json({
+            success: true,
+            message: 'Appointment created successfully',
+            data: savedAppointment
+        });
 
-
-
-
-
-        res.send(result);
-
-    } catch (err) {
-        res.status(500).json(err);
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Error creating appointment:', error);
+        
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to create appointment',
+            error: error.message
+        });
+    } finally {
+        session.endSession();
     }
 };
 
-
-
-
-
+/**
+ * Creates a new appointment without user association and updates doctor's records
+ * @param {Object} req - Express request object containing appointment details
+ * @param {Object} res - Express response object
+ * @returns {Object} Response with appointment details or error message
+ */
 const addAppointmentWithoutUser = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
+        const { doctorID, ...appointmentData } = req.body;
 
-        const newDocument = new DentalAppointment(req.body);
-        const result = await newDocument.save();
+        // Validate required fields
+        if (!doctorID) {
+            return res.status(400).json({
+                success: false,
+                message: 'Doctor ID is required'
+            });
+        }
 
+        // Create new appointment
+        const newAppointment = new DentalAppointment({
+            ...appointmentData,
+            doctorID
+        });
 
-        const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
+        const savedAppointment = await newAppointment.save({ session });
 
-        const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
-
+        // Update doctor's appointments
         await DentalDoctors.updateOne(
-            { _id: doctorIDnew },
-            {
-                $push: {
-                    appointmentID: appointmentIDnew
-                }
-            }
-        )
-        res.send(result);
+            { _id: doctorID },
+            { 
+                $push: { appointmentID: savedAppointment._id },
+                NotificationNewAppoint: "Unseen"
+            },
+            { session }
+        );
 
-    } catch (err) {
-        res.status(500).json(err);
+        await session.commitTransaction();
+
+        return res.status(201).json({
+            success: true,
+            message: 'Appointment created successfully',
+            data: savedAppointment
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Error creating appointment:', error);
+        
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to create appointment',
+            error: error.message
+        });
+    } finally {
+        session.endSession();
     }
 };
-
-
 
 const findAllAppointofUserByID = async (req, resp) => {
     try {
@@ -106,7 +152,6 @@ const findAllAppointofUserByID = async (req, resp) => {
         resp.status(500).json(err);
     }
 };
-
 
 const findAllAppointofDoctorByID = async (req, resp) => {
     try {
@@ -125,7 +170,6 @@ const findAllAppointofDoctorByID = async (req, resp) => {
     }
 };
 
-
 const getSingleAppointmwntWithDetails = async (req, res) => {
     try {
         let single = await DentalAppointment.findById(req.params._id).populate("doctorID").populate("userID").populate("documentsformPatientsID").populate("documentsformDocotorID").populate("clinicID").populate("ratingID").populate("prescriptionID");
@@ -134,8 +178,6 @@ const getSingleAppointmwntWithDetails = async (req, res) => {
         res.status(500).json(err);
     }
 };
-
-
 
 const updateAppointmentDetails = async (req, res) => {
     try {
@@ -150,7 +192,6 @@ const updateAppointmentDetails = async (req, res) => {
     }
 };
 
-
 const findOneOldTreatmentByID = async (req, resp) => {
     try {
         let single = await OldTreatmentHistory.findById(req.params._id);
@@ -160,11 +201,8 @@ const findOneOldTreatmentByID = async (req, resp) => {
     }
 };
 
-
-
 const addnoePrescription = async (req, resp) => {
     try {
-
         let single = await DentalAppointment.findById(req.body.appointmentID);
         console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhh', single)
 
@@ -204,9 +242,39 @@ const addnoePrescription = async (req, resp) => {
     }
 };
 
+const deletePrescription = async (req, res) => {
+    try {
+        const { _id } = req.params;
 
+        if (!_id) {
+            return res.status(400).json({
+                success: false,
+                message: 'Prescription ID is required'
+            });
+        }
 
+        const result = await Prescription.deleteOne({ _id });
 
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Prescription not found'
+            });
+        }
 
+        return res.status(200).json({
+            success: true,
+            message: 'Prescription deleted successfully',
+            data: result
+        });
+    } catch (error) {
+        console.error('Error deleting Prescription:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
 
-module.exports = {addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails };
+module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription };
