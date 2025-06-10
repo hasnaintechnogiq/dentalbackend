@@ -7,6 +7,7 @@ const sendrequestSchema = mongoose.Schema({
         default: "Pending"
     },
     relationType: String,
+    YouAre: String,
     requaesterID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'dentalusers'

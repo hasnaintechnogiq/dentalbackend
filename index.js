@@ -28,7 +28,7 @@ const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: '*' }));
+app.use(cors());
 app.use(bodyParser.json());
 
 
@@ -425,8 +425,37 @@ app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req,
 
 
 
+app.post('/add-job-to-doctor-profile', upload.array('images', 5), async (req, res) => {
+    try {
+        const { doctorId, ...updateData } = req.body;
+        let updateObject = { ...updateData };
 
+        if (req.files && req.files.length > 0) {
+            const imgarry = req.files.map((file) => ({
+                originalname: file.originalname,
+                filename: file.filename,
+                path: file.path,
+                profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+            }));
+            updateObject.imgarry = imgarry;
+        }
 
+        const updatedDoctor = await DentalDoctors.findByIdAndUpdate(
+            doctorId,
+            { $set: updateObject },
+            { new: true }
+        );
+
+        if (!updatedDoctor) {
+            return res.status(404).json({ message: 'doctor not found' });
+        }
+
+        res.json(updatedDoctor);
+    } catch (error) {
+        console.error('Error updating doctor:', error);
+        res.status(500).json({ message: 'Error updating doctor details' });
+    }
+});
 
 
 
@@ -573,7 +602,7 @@ app.post('/reminders', (req, res) => {
 // }, 2000)
 
 
-app.use('/', Routes);
+
 
 app.post('/update-clinic-details', upload.array('images', 5), async (req, res) => {
     try {
@@ -606,6 +635,8 @@ app.post('/update-clinic-details', upload.array('images', 5), async (req, res) =
         res.status(500).json({ message: 'Error updating clinic details' });
     }
 });
+
+app.use('/', Routes);
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)

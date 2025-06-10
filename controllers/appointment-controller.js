@@ -277,4 +277,25 @@ const deletePrescription = async (req, res) => {
     }
 };
 
-module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription };
+const getBookedSlots = async (req, res) => {
+    try {
+        const { doctorID, date } = req.params;
+        
+        const appointments = await DentalAppointment.find({
+            doctorID: doctorID,
+            Bookdate: date,
+            requestStatus: { $ne: "Cancelled" }
+        }).select('BookTime');
+
+        return res.status(200).json(appointments);
+    } catch (error) {
+        console.error('Error fetching booked slots:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to fetch booked slots',
+            error: error.message
+        });
+    }
+};
+
+module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription, getBookedSlots };

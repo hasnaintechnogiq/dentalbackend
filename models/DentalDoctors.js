@@ -16,6 +16,18 @@ const dentaldoctorsSchema = mongoose.Schema({
     fcmToken: String,
     drotp: String,
     profile_url: String,
+    instituteName: String,
+    registrationNumber: String,
+    aadharNumber: Number,
+    imgarry: Array,
+    Certified: {
+        type: String,
+        default: "No"
+    },
+    FormSubmitted: {
+        type: String,
+        default: "No"
+    },
     NotificationNewAppoint: {
         type: String,
         default: "Seen"
