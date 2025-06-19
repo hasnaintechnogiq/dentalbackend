@@ -47,7 +47,7 @@ const addAppointmentFunction = async (req, res) => {
         // Update doctor's appointments and notification
         await DentalDoctors.updateOne(
             { _id: doctorID },
-            { 
+            {
                 $push: { appointmentID: savedAppointment._id },
                 NotificationNewAppoint: "Unseen"
             },
@@ -65,7 +65,7 @@ const addAppointmentFunction = async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         console.error('Error creating appointment:', error);
-        
+
         return res.status(500).json({
             success: false,
             message: 'Failed to create appointment',
@@ -108,7 +108,7 @@ const addAppointmentWithoutUser = async (req, res) => {
         // Update doctor's appointments
         await DentalDoctors.updateOne(
             { _id: doctorID },
-            { 
+            {
                 $push: { appointmentID: savedAppointment._id },
                 NotificationNewAppoint: "Unseen"
             },
@@ -126,7 +126,7 @@ const addAppointmentWithoutUser = async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         console.error('Error creating appointment:', error);
-        
+
         return res.status(500).json({
             success: false,
             message: 'Failed to create appointment',
@@ -277,10 +277,52 @@ const deletePrescription = async (req, res) => {
     }
 };
 
+
+const updatePrescription = async (req, res) => {
+    try {
+        const { _id } = req.params;
+        const updateData = req.body;
+
+        if (!_id) {
+            return res.status(400).json({
+                success: false,
+                message: 'Prescription ID is required'
+            });
+        }
+
+        // Update the prescription
+        const updatedPrescription = await Prescription.findByIdAndUpdate(
+            _id,
+            updateData,
+            { new: true }
+        );
+
+        if (!updatedPrescription) {
+            return res.status(404).json({
+                success: false,
+                message: 'Prescription not found'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Prescription updated successfully',
+            data: updatedPrescription
+        });
+    } catch (error) {
+        console.error('Error updating prescription:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
 const getBookedSlots = async (req, res) => {
     try {
         const { doctorID, date } = req.params;
-        
+
         const appointments = await DentalAppointment.find({
             doctorID: doctorID,
             Bookdate: date,
@@ -298,4 +340,4 @@ const getBookedSlots = async (req, res) => {
     }
 };
 
-module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription, getBookedSlots };
+module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription, updatePrescription, getBookedSlots };

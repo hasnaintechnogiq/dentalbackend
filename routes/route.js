@@ -4,7 +4,7 @@ const authenticate = require('../authenticate');
 
 const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
 const { findOneClinicByID, updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
-const { addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails, findOneOldTreatmentByID, addnoePrescription ,deletePrescription, getBookedSlots} = require('../controllers/appointment-controller.js');
+const { addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails, findOneOldTreatmentByID, addnoePrescription ,updatePrescription,deletePrescription, getBookedSlots} = require('../controllers/appointment-controller.js');
 const { createArrayforChat, addNewChat, getChatDetails, getOneUserChat, getOneDoctorChat } = require('../controllers/chat-controller.js');
 const { addStaffFunction, findAllStaffofDoctorByID, findOneStaffByID, updateStaffFunction } = require('../controllers/staff-controller.js');
 const { createArrayforRating, getOneDoctorAllRatings, addNewTicket } = require('../controllers/extra-controller.js');
@@ -47,6 +47,7 @@ router.put("/update-Appointment-Details/:_id", updateAppointmentDetails)
 router.get("/find-One-Old-Treatment-By-ID/:_id", findOneOldTreatmentByID)
 router.post("/add-prescription", addnoePrescription)
 router.delete("/delete-prescription/:_id", deletePrescription)
+router.put("/update-prescription-Details/:_id", updatePrescription)
 router.get('/get-booked-slots/:doctorID/:date', getBookedSlots);
 
 // Chat routes
