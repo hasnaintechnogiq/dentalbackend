@@ -10,7 +10,7 @@ const DentalAppointment = require('./models/DentalAppointment.js');
 const DocumentPDF = require('./models/DocumentPDF.js');
 const OldTreatmentHistory = require('./models/OldTreatmentHistory.js');
 const Staffs = require('./models/Staffs.js');
-
+const BASE_URL = process.env.BASE_URL;
 const XLSX = require('xlsx');
 
 const bodyParser = require('body-parser');
@@ -121,7 +121,7 @@ app.post('/add-previus-images-documents', upload.array('images', 5), async (req,
             originalname: file.originalname,
             filename: file.filename,
             path: file.path,
-            profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+            profile_url: `${BASE_URL}/profile/${file.filename}`
         }));
 
 
@@ -156,7 +156,7 @@ app.post('/upload-profile-image-for-doctor-new', upload.single('image'), async (
             return res.status(400).send('No files were uploaded.');
         }
         const formData = req.body;
-        const profile_url = `https://dentalbackend-3gjq.onrender.com/profile/${files.filename}`;
+        const profile_url = `${BASE_URL}/profile/${files.filename}`;
         console.log(profile_url)
         let singleUser = await DentalDoctors.findById(formData.doctorID)
 
@@ -191,7 +191,7 @@ app.post('/upload-profile-image-for-patient', upload.single('image'), async (req
             return res.status(400).send('No files were uploaded.');
         }
         const formData = req.body;
-        const profile_url = `https://dentalbackend-3gjq.onrender.com/profile/${files.filename}`;
+        const profile_url = `${BASE_URL}/profile/${files.filename}`;
         console.log(profile_url)
         let singleUser = await DentalUser.findById(formData.userID)
 
@@ -259,7 +259,7 @@ app.post('/add-treament-images-from-doctor', upload.array('images', 5), async (r
             originalname: file.originalname,
             filename: file.filename,
             path: file.path,
-            profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+            profile_url: `${BASE_URL}/profile/${file.filename}`
         }));
 
         let singleUser = await DentalAppointment.findById(formData.appointmentID)
@@ -403,7 +403,7 @@ app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req,
         originalname: file.originalname,
         filename: file.filename,
         path: file.path,
-        profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+        profile_url: `${BASE_URL}/profile/${file.filename}`
     }));
 
     const result = await Clinic.create({ ...formData, imgarry });
@@ -435,7 +435,7 @@ app.post('/add-job-to-doctor-profile', upload.array('images', 5), async (req, re
                 originalname: file.originalname,
                 filename: file.filename,
                 path: file.path,
-                profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+                profile_url: `${BASE_URL}/profile/${file.filename}`
             }));
             updateObject.imgarry = imgarry;
         }
@@ -614,7 +614,7 @@ app.post('/update-clinic-details', upload.array('images', 5), async (req, res) =
                 originalname: file.originalname,
                 filename: file.filename,
                 path: file.path,
-                profile_url: `https://dentalbackend-3gjq.onrender.com/profile/${file.filename}`
+                profile_url: `${BASE_URL}/profile/${file.filename}`
             }));
             updateObject.imgarry = imgarry;
         }
