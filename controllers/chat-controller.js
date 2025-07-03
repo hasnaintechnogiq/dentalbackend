@@ -57,31 +57,49 @@ const createArrayforChat = async (req, res) => {
 
 
 
+// const addNewChat = async (req, res) => {
+//     try {
+//         // let single = await SecondaryArrayOfChats.findById(req.body.SecondaryArrayOfChatsID);
+//         const newDocument = new ChatDental(req.body);
+//         const resultfirst = await newDocument.save();
+
+//         const appointmentIDnew = new mongoose.Types.ObjectId(req.body.SecondaryArrayOfChatsID);
+//         await SecondaryArrayOfChats.updateOne(
+//             { _id: appointmentIDnew },
+//             {
+//                 $push: {
+//                     chatAllID: resultfirst
+//                 }
+//             }
+//         )
+
+//         res.send(resultfirst);
+
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// };
+
+
 const addNewChat = async (req, res) => {
     try {
-        // let single = await SecondaryArrayOfChats.findById(req.body.SecondaryArrayOfChatsID);
-        const newDocument = new ChatDental(req.body);
-        const resultfirst = await newDocument.save();
+        const io = req.app.get('io'); // Access socket instance
+
+        const newMessage = new ChatDental(req.body);
+        const savedMessage = await newMessage.save();
 
         const appointmentIDnew = new mongoose.Types.ObjectId(req.body.SecondaryArrayOfChatsID);
         await SecondaryArrayOfChats.updateOne(
             { _id: appointmentIDnew },
-            {
-                $push: {
-                    chatAllID: resultfirst
-                }
-            }
-        )
-
-        res.send(resultfirst);
-
+            { $push: { chatAllID: savedMessage._id } }
+        );
+        io.to(req.body.SecondaryArrayOfChatsID).emit('newMessage', savedMessage);
+        res.send(savedMessage);
     } catch (err) {
+        console.error(err);
         res.status(500).json(err);
     }
 };
-
-
-
 
 
 const getChatDetails = async (req, res) => {

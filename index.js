@@ -1,6 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
+const http = require('http');
+const socketIo = require('socket.io');
 require("./config");
 var cors = require('cors')
 const DentalUser = require('./models/DentalUser.js');
@@ -30,7 +32,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
-
+const server = http.createServer(app);
 
 const Routes = require("./routes/route.js")
 
@@ -49,6 +51,54 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 app.use('/profile', express.static('upload/images'));
+// Initialize Socket.IO on top of the HTTP server
+const io = socketIo(server, {
+    cors: {
+        origin: '*', // replace with your frontend URL in production
+        methods: ['GET', 'POST']
+    }
+});
+
+app.set('io', io);
+
+// Socket.IO logic
+io.on('connection', (socket) => {
+    console.log('New socket connected:', socket.id);
+
+    socket.on('joinRoom', (roomID) => {
+        socket.join(roomID);
+        console.log(`Socket ${socket.id} joined room ${roomID}`);
+    });
+
+    socket.on('sendMessage', async (data) => {
+        try {
+            // Save the message like before
+            const ChatDental = require('./models/ChatDental');
+            const SecondaryArrayOfChats = require('./models/SecondaryArrayOfChats');
+
+            const newChat = new ChatDental(data);
+            const savedChat = await newChat.save();
+
+            await SecondaryArrayOfChats.updateOne(
+                { _id: data.SecondaryArrayOfChatsID },
+                { $push: { chatAllID: savedChat._id } }
+            );
+
+            io.to(data.SecondaryArrayOfChatsID).emit('newMessage', savedChat);
+        } catch (err) {
+            console.error('Error handling sendMessage:', err);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+// Start the HTTP server (not just app.listen anymore!)
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
 
 
