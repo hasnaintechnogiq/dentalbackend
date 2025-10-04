@@ -14,7 +14,7 @@ const OldTreatmentHistory = require('./models/OldTreatmentHistory.js');
 const Staffs = require('./models/Staffs.js');
 // const BASE_URL = process.env.BASE_URL;
 const XLSX = require('xlsx');
-
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const schedule = require('node-schedule');
 
@@ -38,6 +38,7 @@ const Routes = require("./routes/route.js")
 
 const multer = require("multer");
 const path = require("path");
+const crypto = require('crypto');
 
 
 const storage = multer.diskStorage({
@@ -49,8 +50,24 @@ const storage = multer.diskStorage({
     },
 });
 
+// Shubham's code
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, './upload/images');
+//     },
+//     filename: (req, file, cb) => {
+//         const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
+//         const extension = path.extname(file.originalname);
+//         cb(null, `${file.fieldname}_${uniqueSuffix}${extension}`);
+
+//     },
+// });
 const upload = multer({ storage: storage });
 app.use('/profile', express.static('upload/images'));
+// Shubham's code
+// app.use('/profile', express.static(path.join(__dirname, 'upload/images')));  // for clinic images
+// app.use('/upload', express.static(path.join(__dirname, 'upload')));  // for staff profile picture
+
 // Initialize Socket.IO on top of the HTTP server
 const io = socketIo(server, {
     cors: {
@@ -405,25 +422,45 @@ app.post('/upload-documents-form-doctor', upload.single('document'), async (req,
 });
 
 
+// Shubham's code
+// app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req, res) => {
+//     const files = req.files;
+//     if (!files || files.length === 0) {
+//         const formData = req.body;
+//         const result = await Clinic.create({ ...formData });
 
+//         let objID = new mongoose.Types.ObjectId(result.id);
+//         let newss = new mongoose.Types.ObjectId(req.body.doctorID);
+//         console.log(objID);
+//         await DentalDoctors.updateOne(
+//             { _id: newss },
+//             { $push: { clinicID: objID } },
+//         )
+//         return res.send(result);
+//     }
 
+//     const formData = req.body;
+//     console.log(files)
+//     const imgarry = files.map((file) => ({
+//         originalname: file.originalname,
+//         filename: file.filename,
+//         path: file.path.replace(/\\/g, '/'),
+//         profile_url: `${req.protocol}://${req.get('host')}/profile/${file.filename}`
+//     }));
 
+//     console.log('image arry', imgarry)
+//     const result = await Clinic.create({ ...formData, imgarry });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//     let objID = new mongoose.Types.ObjectId(result.id);
+//     let newss = new mongoose.Types.ObjectId(req.body.doctorID)
+//     console.log(objID);
+//     await DentalDoctors.updateOne(
+//         { _id: newss },
+//         { $push: { clinicID: objID } },
+//     )
+//     res.send(result);
+//     // res.send(imgarry);
+// });
 app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req, res) => {
     const files = req.files;
     if (!files || files.length === 0) {
@@ -472,7 +509,107 @@ app.post('/add-clinic-in-doctor-profile', upload.array('images', 5), async (req,
 });
 
 
+// Update clinic details with image handling Shubham's code
+// app.post('/update-clinic-details', upload.array('images', 5), async (req, res) => {
+//     try {
+//         console.log("update clinic", req.body)
+//         console.log("update clinic file", req.files)
 
+//         const { clinicId, existingImages, ...formData } = req.body;
+
+//         if (!clinicId) {
+//             return res.status(400).json({ error: 'clinicId is required' });
+//         }
+
+//         let updateObject = { ...formData };
+
+//         let updateImgArray = false; // flag to check if we should update imgarry
+//         let existingImgArr = [];
+
+//         console.log("existing image", existingImages)
+
+//         // Handle kept images
+//         if (existingImages) {
+//             let parsedImages;
+//             if (typeof existingImages === 'string') {
+//                 parsedImages = [JSON.parse(existingImages)];
+//             } else if (Array.isArray(existingImages)) {
+//                 parsedImages = existingImages.map(img =>
+//                     typeof img === 'string' ? JSON.parse(img) : img
+//                 ).filter(Boolean);
+//             }
+//             existingImgArr = parsedImages || [];
+//             updateImgArray = true;
+//         }
+
+//         // Handle new uploaded images
+//         if (req.files && req.files.length > 0) {
+//             const newImages = req.files.map(file => ({
+//                 originalname: file.originalname,
+//                 filename: file.filename,
+//                 path: file.path.replace(/\\/g, '/'),
+//                 profile_url: `${req.protocol}://${req.get('host')}/profile/${file.filename}`,
+//             }));
+
+//             // Merge existing and new
+//             updateObject.imgarry = [...existingImgArr, ...newImages];
+//         } else if (updateImgArray) {
+//             // No new uploads, only keep existing ones
+//             updateObject.imgarry = existingImgArr;
+//         }
+
+//         const updatedClinic = await Clinic.findByIdAndUpdate(
+//             clinicId,
+//             { $set: updateObject },
+//             { new: true }
+//         );
+
+//         res.status(200).json(updatedClinic);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Internal Server Error' });
+//     }
+// });
+
+app.delete('/delete-clinic/:clinicId/:doctorID', async (req, res) => {
+    try {
+        console.log('delete clinic req', req.params)
+        const { clinicId, doctorID } = req.params;
+
+        const clinic = await Clinic.findById(clinicId);
+        if (!clinic) {
+            return res.status(404).json({ message: 'Clinic not found' });
+        }
+
+        // Delete associated image files (if stored locally)
+        if (clinic.imgarry && clinic.imgarry.length > 0) {
+            clinic.imgarry.forEach((img) => {
+                if (img.path) {
+                    const imagePath = path.join(__dirname, img.path);
+                    fs.unlink(imagePath, (err) => {
+                        if (err) {
+                            console.error('Error deleting image:', imagePath, err.message);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Remove clinic document
+        await Clinic.findByIdAndDelete(clinicId);
+
+        // Remove clinicID reference from doctor profile
+        await DentalDoctors.updateOne(
+            { _id: doctorID },
+            { $pull: { clinicID: clinicId } }
+        );
+
+        res.status(200).json({ message: 'Clinic deleted successfully' });
+    } catch (error) {
+        console.error('Delete clinic error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 app.post('/add-job-to-doctor-profile', upload.array('images', 5), async (req, res) => {
     try {
         const { doctorId, ...updateData } = req.body;
@@ -678,9 +815,144 @@ app.post('/update-clinic-details', upload.array('images', 5), async (req, res) =
         }
 
         res.json(updatedClinic);
-    } catch (error) {
+     } catch (error) {
         console.error('Error updating clinic:', error);
         res.status(500).json({ message: 'Error updating clinic details' });
+    }
+});
+
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in km
+    return distance;
+}
+
+// GET /api/nearby-clinics?latitude=...&longitude=...&search=...&radius=...
+app.get('/nearby-clinics', async (req, res) => {
+    try {
+        const { latitude, longitude, search = '', radius } = req.query;
+
+        if (!latitude || !longitude) {
+            return res.status(400).json({ message: 'Latitude and longitude are required' });
+        }
+
+        const lat = parseFloat(latitude);
+        const lon = parseFloat(longitude);
+        // const radiusInKm = parseFloat(radius);
+
+        // Text search filter: case-insensitive partial match on name (can extend to address, city, etc.)
+        const searchRegex = new RegExp(search, 'i');
+        const matchingClinics = await Clinic.find({
+            $or: [
+                { clinicname: searchRegex },
+                { clinicAddress: searchRegex },
+                // Add more fields if needed:
+                // { city: searchRegex },
+                // { specialization: searchRegex },
+            ]
+        });
+
+        // Calculate distance for filtered clinics
+        const clinicsWithDistance = matchingClinics.map((clinic) => {
+            const distance = getDistanceFromLatLonInKm(
+                lat,
+                lon,
+                parseFloat(clinic.latitude),
+                parseFloat(clinic.longitude)
+            );
+
+            return {
+                ...clinic.toObject(),
+                distance: distance.toFixed(2),
+            };
+        });
+
+        // Filter by radius
+        // const filteredByRadius = clinicsWithDistance.filter(c => c.distance <= radiusInKm);
+
+        // Sort by proximity
+        clinicsWithDistance.sort((a, b) => a.distance - b.distance);
+
+        res.json(clinicsWithDistance);
+    } catch (error) {
+        console.error('Error fetching nearby clinics:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+app.get('/search-anything-by-doctorID/:drID', async (req, res) => {
+    const { drID } = req.params;
+    const searchTerm = req.query.q?.trim();
+    if (!searchTerm) return res.status(400).json({ error: 'Search term required' });
+
+    const regex = new RegExp(searchTerm, 'i'); // case-insensitive
+
+    try {
+        // Step 1: Find doctor by ID and populate related fields
+        const doctor = await DentalDoctors.findById(drID)
+            .populate({
+                path: 'appointmentID',
+                populate: [
+                    { path: 'userID', model: 'dentalusers' },
+                    { path: 'clinicID', model: 'clinic' },
+                    { path: 'ratingID', model: 'ratingCounter' },
+                ]
+            })
+            .populate({
+                path: 'staffIDs',
+                populate: {
+                    path: 'clinicID',
+                    model: 'clinic',
+                    select: 'clinicname clinicAddress'
+                }
+            });
+
+        if (!doctor) {
+            return res.status(404).json({ error: 'Doctor not found' });
+        }
+
+        // Step 2: If there's a search query, filter results
+        let appointments = doctor.appointmentID || [];
+        let staffs = doctor.staffIDs || [];
+
+        if (regex) {
+            appointments = appointments.filter(app =>
+                regex.test(app?.patientName) ||
+                regex.test(app?.Treatmentfor) ||
+                regex.test(app?.userID?.name) ||
+                regex.test(app?.userID?.email)
+            );
+
+            staffs = staffs.filter(staff =>
+                regex.test(staff?.name) || regex.test(staff?.email)
+            );
+        }
+
+        // console.log("filtered staff", staffs)
+
+        const users = [...new Set(appointments.map(app => app.userID))];
+
+        // Step 3: Return response
+        res.json({
+            appointments,
+            patients: users,
+            staffs,
+        });
+
+    } catch (error) {
+        console.error('Search API error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

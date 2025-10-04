@@ -13,6 +13,7 @@ const clinicSchema = mongoose.Schema({
     NormalFee: Number,
     closeTime: String,
     Details: String,
+    openStatus: String,
     latitude: Number,
     longitude: Number,
     imgarry: Array,

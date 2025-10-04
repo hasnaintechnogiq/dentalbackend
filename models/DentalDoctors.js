@@ -76,6 +76,46 @@ const dentaldoctorsSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'staffs'
     }],
+       oralMedicine: {
+        type: String,
+        default: "No"
+    },
+    pedodontics: {
+        type: String,
+        default: "No"
+    },
+    oralSurgery: {
+        type: String,
+        default: "No"
+    },
+    periodontics: {
+        type: String,
+        default: "No"
+    },
+    orthodontics: {
+        type: String,
+        default: "No"
+    },
+    prosthodontics: {
+        type: String,
+        default: "No"
+    },
+    endodontics: {
+        type: String,
+        default: "No"
+    },
+    rootCanal: {
+        type: String,
+        default: "No"
+    },
+    implants: {
+        type: String,
+        default: "No"
+    },
+    braces: {
+        type: String,
+        default: "No"
+    },
     tokens: [
         {
             token: {

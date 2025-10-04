@@ -144,7 +144,8 @@ const findAllAppointofUserByID = async (req, resp) => {
             populate: [
                 { path: 'userID', model: 'dentalusers' },
                 { path: 'doctorID', model: 'dentaldoctors' },
-                { path: 'clinicID', model: 'clinic' }
+                { path: 'clinicID', model: 'clinic' },
+                { path: 'prescriptionID', model: 'prescription' },
             ]
         });
         resp.send(single);
@@ -153,6 +154,22 @@ const findAllAppointofUserByID = async (req, resp) => {
     }
 };
 
+const getAllAppointmentsByUserId = async (req, res) => {
+    try {
+        let single = await DentalUser
+            .findById(req.params._id)
+            .populate({
+                path: 'appointmentID',
+                populate: [
+                    { path: 'userID', model: 'dentalusers' },
+                    { path: 'prescriptionID', model: 'prescription' },
+                ]
+            })
+        res.send(single)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
 const findAllAppointofDoctorByID = async (req, resp) => {
     try {
         let single = await DentalDoctors.findById(req.params._id).populate({
@@ -340,4 +357,170 @@ const getBookedSlots = async (req, res) => {
     }
 };
 
-module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription, updatePrescription, getBookedSlots };
+
+const getAppointmentsByDate = async (req, res) => {
+    try {
+        const { id: doctorId } = req.params;
+        const { selectedDate: selectedDateStr } = req.query;
+
+        // Convert input date
+        const selectedDate = new Date(selectedDateStr);
+
+        // Calculate date range: 2 months before and after
+        const twoMonthsBefore = new Date(selectedDate);
+        twoMonthsBefore.setMonth(selectedDate.getMonth() - 2);
+
+        const twoMonthsAfter = new Date(selectedDate);
+        twoMonthsAfter.setMonth(selectedDate.getMonth() + 2);
+
+        // Fetch doctor with appointments populated
+        const doctorWithAppointments = await DentalDoctors.findById(doctorId)
+            .populate({
+                path: "appointmentID",
+                match: {
+                    $expr: {
+                        $and: [
+                            {
+                                $gte: [
+                                    {
+                                        $cond: [
+                                            { $eq: [{ $type: "$Bookdate" }, "string"] },
+                                            { $toDate: "$Bookdate" },
+                                            "$Bookdate",
+                                        ],
+                                    },
+                                    twoMonthsBefore,
+                                ],
+                            },
+                            {
+                                $lte: [
+                                    {
+                                        $cond: [
+                                            { $eq: [{ $type: "$Bookdate" }, "string"] },
+                                            { $toDate: "$Bookdate" },
+                                            "$Bookdate",
+                                        ],
+                                    },
+                                    twoMonthsAfter,
+                                ],
+                            },
+                        ],
+                    },
+                },
+            });
+
+        res.status(200).json(doctorWithAppointments);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Something went wrong." });
+    }
+}
+
+const getAppointmentsByMonth = async (req, res) => {
+    try {
+        const { id: doctorId } = req.params;
+        const { year, month } = req.query;
+        console.log('req.qurey', req.query)
+
+        // Convert month to 0-based for JS Date
+        const start = new Date(year, month - 1, 1);
+        const end = new Date(year, month, 0, 23, 59, 59, 999); // End of month
+
+        console.log("start end", start, end)
+        // Fetch doctor with appointments populated
+        const doctorWithAppointments = await DentalDoctors.findById(doctorId)
+            .populate({
+                path: "appointmentID",
+                match: {
+                    $expr: {
+                        $and: [
+                            {
+                                $gte: [
+                                    {
+                                        $cond: [
+                                            { $eq: [{ $type: "$Bookdate" }, "string"] },
+                                            { $toDate: "$Bookdate" },
+                                            "$Bookdate",
+                                        ],
+                                    },
+                                    start,
+                                ],
+                            },
+                            {
+                                $lte: [
+                                    {
+                                        $cond: [
+                                            { $eq: [{ $type: "$Bookdate" }, "string"] },
+                                            { $toDate: "$Bookdate" },
+                                            "$Bookdate",
+                                        ],
+                                    },
+                                    end,
+                                ],
+                            },
+                        ],
+                    },
+                },
+            });
+        res.status(200).json(doctorWithAppointments);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Something went wrong." });
+    }
+
+}
+
+// Get Appointment By Status with pagination
+const getAppointmentsByStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status = "Pending", page = 1, limit = 10 } = req.query;
+
+    try {
+        // Fetch doctor's appointment IDs
+        const doctor = await DentalDoctors.findById(id).select('appointmentID');
+
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        // Convert pagination params to numbers
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+
+        // Fetch appointments with filtering and pagination
+        const [appointments, total] = await Promise.all([
+            DentalAppointment
+                .find({
+                    _id: { $in: doctor.appointmentID },
+                    requestStatus: status
+                })
+                .populate('userID')
+                .skip((pageNum - 1) * limitNum)
+                .limit(limitNum)
+                .sort({ Bookdate: -1 }), // Optional: sort latest first
+
+            DentalAppointment
+                .countDocuments({
+                    _id: { $in: doctor.appointmentID },
+                    requestStatus: status
+                })
+        ]);
+
+        const totalPages = Math.ceil(total / limitNum);
+
+        return res.json({
+            page: pageNum,
+            limit: limitNum,
+            totalAppointments: total,
+            totalPages,
+            hasNextPage: pageNum < totalPages,
+            hasPrevPage: pageNum > 1,
+            appointments
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+module.exports = { addnoePrescription, findOneOldTreatmentByID, updateAppointmentDetails, addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, deletePrescription, updatePrescription, getBookedSlots, getAllAppointmentsByUserId,    getAppointmentsByDate, getAppointmentsByMonth, getAppointmentsByStatus };

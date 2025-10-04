@@ -15,32 +15,63 @@ const Staffs = require('../models/Staffs.js');
 
 
 
-const addStaffFunction = async (req, res) => {
-    console.log(req.body)
-    try {
+// const addStaffFunction = async (req, res) => {
+//     console.log(req.body)
+//     try {
 
-        const newDocument = new Staffs(req.body);
+//         const newDocument = new Staffs(req.body);
+//         const result = await newDocument.save();
+
+//         const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
+//         const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
+
+//         await DentalDoctors.updateOne(
+//             { _id: doctorIDnew },
+//             {
+//                 $push: {
+//                     staffIDs: appointmentIDnew
+//                 }
+//             }
+//         )
+//         res.send(result);
+
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// };
+
+const addStaffFunction = async (req, res) => {
+    console.log('req body', req.body)
+    console.log('req file', req.file)
+    try {
+        const { body, file } = req;
+
+        const profileImageUrl = file
+            ? `${req.protocol}://${req.get('host')}/upload/${file.filename}`
+            : null;
+
+        const newStaffData = {
+            ...body,
+            ...(profileImageUrl && { profile_url: profileImageUrl }),
+        };
+
+        const newDocument = new Staffs(newStaffData);
         const result = await newDocument.save();
 
-        const doctorIDnew = new mongoose.Types.ObjectId(req.body.doctorID);
-        const appointmentIDnew = new mongoose.Types.ObjectId(newDocument.id);
+        const doctorIDnew = new mongoose.Types.ObjectId(body.doctorID);
+        const staffIDnew = new mongoose.Types.ObjectId(result._id);
 
         await DentalDoctors.updateOne(
             { _id: doctorIDnew },
-            {
-                $push: {
-                    staffIDs: appointmentIDnew
-                }
-            }
-        )
-        res.send(result);
+            { $push: { staffIDs: staffIDnew } }
+        );
 
-    } catch (err) {
-        res.status(500).json(err);
+        res.status(201).json(result);
+    } catch (error) {
+        console.error('Error in addNewStaff:', error);
+        res.status(500).json({ error: 'Failed to add new staff' });
     }
 };
-
-
 
 
 
@@ -72,25 +103,56 @@ const findOneStaffByID = async (req, resp) => {
     }
 };
 
+// const updateStaffFunction = async (req, res) => {
+//     try {
+//         const staffId = req.params._id;
+//         const updatedData = req.body;
+        
+//         const result = await Staffs.findByIdAndUpdate(
+//             staffId,
+//             { $set: updatedData },
+//             { new: true }
+//         ).populate("clinicID");
+
+//         if (!result) {
+//             return res.status(404).json({ message: "Staff not found" });
+//         }
+
+//         res.send(result);
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// };
 const updateStaffFunction = async (req, res) => {
     try {
         const staffId = req.params._id;
-        const updatedData = req.body;
-        
+        const { body, file } = req;
+
+        // Construct new image URL if a file was uploaded
+        const profileImageUrl = file
+            ? `${req.protocol}://${req.get('host')}/upload/${file.filename}`
+            : null;
+
+        // Prepare updated data
+        const updatedData = {
+            ...body,
+            ...(profileImageUrl && { profile_url: profileImageUrl }),
+        };
+
         const result = await Staffs.findByIdAndUpdate(
             staffId,
             { $set: updatedData },
             { new: true }
-        ).populate("clinicID");
+        ).populate('clinicID');
 
         if (!result) {
-            return res.status(404).json({ message: "Staff not found" });
+            return res.status(404).json({ message: 'Staff not found' });
         }
 
         res.send(result);
     } catch (err) {
-        res.status(500).json(err);
+        console.error('Update Error:', err);
+        res.status(500).json({ error: 'Failed to update staff' });
     }
 };
-
 module.exports = { addStaffFunction, findAllStaffofDoctorByID, findOneStaffByID, updateStaffFunction };

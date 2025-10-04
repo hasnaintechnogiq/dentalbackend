@@ -32,13 +32,51 @@ const getSingleUser = async (req, resp) => {
                 { path: 'requaesterID', model: 'dentalusers' },
                 { path: 'accepterID', model: 'dentalusers' }
             ]
-        });
+        }).populate({
+                path: 'appointmentID',
+                select: 'BookTime Bookdate ProblemDetails Treatmentfor diabetes Bloodpressure PayStatus PayType doctorID',
+                populate: {
+                    path: 'doctorID',
+                    model: 'dentaldoctors',
+                    select: 'drname drmail dremail drpassword'
+                }
+            })
         resp.send(single);
     } catch (err) {
         resp.status(500).json(err);
     }
 };
 
+const getAppointmentsOfUserWithDoctor = async (req, res) => {
+    const { userID, doctorID } = req.params;
+
+    try {
+        const user = await DentalUser
+            .findById(userID)
+            .populate({
+                path: 'appointmentID',
+                select: 'BookTime Bookdate ProblemDetails Treatmentfor diabetes Bloodpressure PayStatus PayType doctorID',
+                populate: {
+                    path: 'doctorID',
+                    model: 'dentaldoctors',
+                    select: 'drname drmail'
+                }
+            });
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Filter only appointments with the specified doctor
+        const filteredAppointments = user.appointmentID.filter(
+            (appt) => appt.doctorID && appt.doctorID._id.toString() === doctorID
+        );
+
+        res.json(filteredAppointments);
+
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+}
 
 const addNewUser = async (req, res) => {
     const { email } = req.body;
@@ -310,4 +348,4 @@ const updateFamilyRequestDetails = async (req, res) => {
 
 
 
-module.exports = { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser, searchUserByAllDetails };
+module.exports = { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser, searchUserByAllDetails,getAppointmentsOfUserWithDoctor };

@@ -1,14 +1,21 @@
 const router = require('express').Router();
 const authenticate = require('../authenticate');
+const multer = require('multer');
+const path = require('path');
 
 
-const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser } = require('../controllers/user-controller.js');
-const { findOneClinicByID, updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors } = require('../controllers/doctor-controller.js');
-const { addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails, findOneOldTreatmentByID, addnoePrescription ,updatePrescription,deletePrescription, getBookedSlots} = require('../controllers/appointment-controller.js');
+const { updateFamilyRequestDetails, findUserDetailsWithStatus, addFamilyMember, searchUserByAllDetails, checkotpnow, genarateOtpandsendtoemail, getAllUsers, getSingleUser, addNewUser, updateUserDetail, deleteUser, getAppointmentsOfUserWithDoctor } = require('../controllers/user-controller.js');
+const { findOneClinicByID, updateDoctorDetail, addDoctorProfile, searchDoctorsByCity, searchDoctorsByName, findOneDoctorByID, getAllDoctors, searchAllAppointmentsByDoctorID, searchDoctorsBySpecialities, getUniquePatientsByDoctorID, } = require('../controllers/doctor-controller.js');
+const { addAppointmentFunction, addAppointmentWithoutUser, findAllAppointofUserByID, findAllAppointofDoctorByID, getSingleAppointmwntWithDetails, updateAppointmentDetails, findOneOldTreatmentByID, addnoePrescription, updatePrescription,deletePrescription, getBookedSlots, getAllAppointmentsByUserId, getAppointmentsByDate, getAppointmentsByMonth, getAppointmentsByStatus,} = require('../controllers/appointment-controller.js');
 const { createArrayforChat, addNewChat, getChatDetails, getOneUserChat, getOneDoctorChat } = require('../controllers/chat-controller.js');
 const { addStaffFunction, findAllStaffofDoctorByID, findOneStaffByID, updateStaffFunction } = require('../controllers/staff-controller.js');
 const { createArrayforRating, getOneDoctorAllRatings, addNewTicket } = require('../controllers/extra-controller.js');
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'upload/'),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
+});
+const upload = multer({ storage });
 
 // User routes
 
@@ -23,6 +30,7 @@ router.get("/search-user/:key", searchUserByAllDetails)
 router.post("/add-new-member", addFamilyMember)
 router.post("/find-User-Details-With-Status", findUserDetailsWithStatus)
 router.put("/update-Family-Request-Details/:_id", updateFamilyRequestDetails)
+router.get('/appointments/user/:userID/doctor/:doctorID', getAppointmentsOfUserWithDoctor);
 
 // Doctor routes
 
@@ -34,6 +42,9 @@ router.get("/get-single-doctor/:_id", findOneDoctorByID)
 router.get("/all-doctors", getAllDoctors)
 router.put("/update-doctor-detail/:_id", updateDoctorDetail)
 router.get("/get-single-clinic/:_id", findOneClinicByID)
+router.get('/search-all-appointments-by-doctorID/:drID', searchAllAppointmentsByDoctorID)
+router.get("/search-doctors-by-specialties", searchDoctorsBySpecialities)
+router.get("/get-unique-patients/doctor/:id/patients/", getUniquePatientsByDoctorID) // With pagination
 
 
 // Appointment routes
@@ -41,7 +52,8 @@ router.get("/get-single-clinic/:_id", findOneClinicByID)
 router.post("/book-appointment", addAppointmentFunction)
 router.post("/book-appointment-without-user", addAppointmentWithoutUser)
 router.get("/get-single-user-with-appointment/:_id", findAllAppointofUserByID)
-router.get("/get-single-doctor-with-appointment/:_id", findAllAppointofDoctorByID)
+router.get("/get-all-appointments-by-user/:_id", getAllAppointmentsByUserId)  //find in User's schema
+router.get("/get-single-doctor-with-appointment/:_id", findAllAppointofDoctorByID)  //find in Doctor's schema
 router.get("/get-single-appointment-with-details/:_id", getSingleAppointmwntWithDetails)
 router.put("/update-Appointment-Details/:_id", updateAppointmentDetails)
 router.get("/find-One-Old-Treatment-By-ID/:_id", findOneOldTreatmentByID)
@@ -49,6 +61,9 @@ router.post("/add-prescription", addnoePrescription)
 router.delete("/delete-prescription/:_id", deletePrescription)
 router.put("/update-prescription-Details/:_id", updatePrescription)
 router.get('/get-booked-slots/:doctorID/:date', getBookedSlots);
+router.get('/get-appointments-by-date/:id/appointments/', getAppointmentsByDate)
+router.get('/get-appointments-by-month/:id/appointments/', getAppointmentsByMonth)
+router.get('/get-appointments-by-status/doctor/:id/appointments/', getAppointmentsByStatus)  // With pagination
 
 // Chat routes
 
@@ -67,6 +82,9 @@ router.get("/get-one-doctor-chat/:_id", getOneDoctorChat)
 
 
 router.post("/add-new-staff", addStaffFunction)
+// Shubham's code 
+// router.post('/add-new-staff', upload.single('profile_url'), addStaffFunction); // Route with image upload middleware + controller
+router.put('/update-staff-details/:_id', upload.single('profile_url'), updateStaffFunction);
 router.get("/get-doctor-with-staff/:_id", findAllStaffofDoctorByID)
 router.get("/get-one-staff-with-details/:_id", findOneStaffByID)
 router.put("/update-staff-details/:_id", updateStaffFunction)
